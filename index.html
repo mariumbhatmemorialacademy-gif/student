@@ -1,0 +1,1477 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>মরিয়ম ভাট মেমোরিয়াল একাডেমী - স্টুডেন্ট পোর্টাল</title>
+    
+    <!-- Firebase SDK v8 -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    
+    <!-- html2pdf for receipt download -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <style>
+        html, body { font-family: 'Hind Siliguri', sans-serif; background-color: #f4f5f7; margin: 0; padding: 0; overflow-x: hidden; width: 100%; touch-action: pan-y; }
+        
+        /* Unified School Header */
+        .school-header { background-color: #1a7844; color: white; padding: 25px 15px; text-align: center; border-bottom-left-radius: 20px; border-bottom-right-radius: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.15); z-index: 100; position: relative; }
+        .school-header .bismillah { font-size: 13px; margin-bottom: 8px; font-weight: 600; color: #e8f5e9; }
+        .school-header img.logo { width: 75px; height: 75px; border-radius: 50%; background: white; margin-bottom: 10px; object-fit: cover; border: 2px solid #fff; padding: 2px; }
+        .school-header h2 { font-weight: 700; font-size: 22px; margin-bottom: 5px; }
+        .school-header .address { font-size: 13px; margin-bottom: 5px; opacity: 0.9; }
+        .school-header .mobile-text { color: #ffeb3b; font-size: 15px; font-weight: 700; letter-spacing: 0.5px; margin-top: 5px; text-shadow: 1px 1px 2px rgba(0,0,0,0.3); }
+
+        .notice-bar { background: linear-gradient(90deg, #F3B007 0%, #F9D423 100%); color: #5c3000; padding: 12px 15px; font-weight: 700; display: flex; align-items: center; font-size: 15px; box-shadow: 0 4px 10px rgba(243, 176, 7, 0.3); border-bottom: 2px solid #e0a800; }
+        .notice-bar i { color: #d32f2f; font-size: 18px; margin-right: 10px; }
+
+        .page-title-banner { background: #ffffff; padding: 10px 15px; text-align: center; font-weight: 700; font-size: 16px; border-bottom: 2px solid #1a7844; box-shadow: 0 2px 5px rgba(0,0,0,0.05); margin-bottom: 20px; color: #1a7844; }
+
+        .custom-card { background: white; border-radius: 10px; border: none; box-shadow: 0 4px 10px rgba(0,0,0,0.06); margin-bottom: 20px; }
+        
+        .border-left-blue { border-left: 6px solid #1976d2; }
+        .border-left-teal { border-left: 6px solid #1a7844; }
+        .border-left-warning { border-left: 6px solid #f39c12; }
+        .border-left-purple { border-left: 6px solid #9c27b0; }
+        .border-left-danger { border-left: 6px solid #d32f2f; }
+
+        .section-title-gallery { font-size: 16px; font-weight: 700; color: #ffffff; background: linear-gradient(to right, #00796b, #009688); padding: 8px 30px; border-radius: 30px; display: inline-block; box-shadow: 0 4px 8px rgba(0, 121, 107, 0.3); margin-bottom: 15px; }
+
+        .page-view { display: none; padding-bottom: 40px; max-width: 600px; margin: auto; background: #f4f5f7; min-height: 100vh;}
+        .page-view.active { display: block; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        
+        .gallery-slider-container { position: relative; width: 100%; height: 220px; overflow: hidden; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); background: #000; margin: 0 auto 20px auto; }
+        .gallery-slider-track { display: flex; height: 100%; transition: transform 0.5s ease-in-out; }
+        .gallery-slide { min-width: 100%; height: 100%; object-fit: cover; }
+        .slider-btn { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.6); color: white; border: none; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; z-index: 10; display: flex; align-items: center; justify-content: center; transition: 0.3s; }
+        .slider-btn:hover { background: rgba(0,0,0,0.8); }
+        .slider-btn.prev { left: 10px; }
+        .slider-btn.next { right: 10px; }
+        .slider-dots { position: absolute; bottom: 10px; left: 0; width: 100%; text-align: center; z-index: 10;}
+        .slider-dot { display: inline-block; width: 8px; height: 8px; background: rgba(255,255,255,0.5); border-radius: 50%; margin: 0 3px; cursor: pointer; transition: 0.3s; }
+        .slider-dot.active { background: white; transform: scale(1.3); }
+
+        .dash-cat-box { background: white; padding: 20px 10px; border-radius: 12px; text-align: center; box-shadow: 0 4px 8px rgba(0,0,0,0.05); cursor: pointer; border: 1px solid #eee; transition: 0.2s; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center;}
+        .dash-cat-box:active { transform: scale(0.95); }
+        .dash-cat-box i { font-size: 30px; margin-bottom: 10px; }
+        .dash-cat-box h6 { font-weight: 700; margin: 0; color: #444; font-size: 14px; }
+        
+        .profile-img-lg { width: 110px; height: 110px; border-radius: 50%; border: 4px solid #1a7844; object-fit: cover; box-shadow: 0 4px 8px rgba(0,0,0,0.1); background: #fff;}
+        .student-img-sm { width: 55px; height: 55px; border-radius: 50%; border: 2px solid #1a7844; object-fit: cover; background: #fff;}
+        .teacher-img-sm { width: 55px; height: 55px; border-radius: 50%; border: 2px solid #ddd; object-fit: cover; background: #fff;}
+        
+        .student-list-item { background: white; padding: 15px; border-radius: 10px; border: 1px solid #eee; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.02);}
+
+        .custom-modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 9999; display: none; justify-content: center; align-items: center; backdrop-filter: blur(4px); }
+        .custom-modal-box { background: white; width: 90%; max-width: 330px; border-radius: 15px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.2); text-align: center; }
+        .custom-modal-header { padding: 18px; font-weight: bold; font-size: 18px; }
+        .custom-modal-body { padding: 20px 15px; font-size: 15px; color: #444; line-height: 1.6; }
+        .custom-modal-footer { border-top: 1px solid #f0f0f0; display: flex; }
+        .custom-modal-btn { width: 100%; padding: 14px; background: transparent; border: none; font-weight: bold; font-size: 16px; cursor: pointer; color: #1a7844; }
+        .btn-confirm-cancel { flex: 1; border-right: 1px solid #f0f0f0; color: #6c757d; }
+        .btn-confirm-ok { flex: 1; color: #d32f2f; }
+        
+        .profile-list .list-group-item { border: none; padding: 10px 0; border-bottom: 1px dashed #eee; font-size: 15px; text-align: left;}
+        .profile-list .list-group-item strong { color: #555; display: inline-block; width: 130px;}
+        
+        #loadingOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f4f5f7; z-index: 10000; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.5s;}
+        .loader { border: 5px solid #f3f3f3; border-top: 5px solid #1a7844; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin-bottom: 15px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        .receipt-container { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin-bottom: 20px; color: #000; font-family: 'Hind Siliguri', sans-serif;}
+        .receipt-header { border-bottom: 2px solid #1976d2; padding-bottom: 15px; margin-bottom: 15px; text-align: center; position: relative;}
+        .receipt-table { width: 100%; border-collapse: collapse; margin-bottom: 15px; font-size: 14px;}
+        .receipt-table th, .receipt-table td { border: 1px solid #000; padding: 8px; text-align: left; }
+        .receipt-table th { background-color: #f0f0f0; }
+        .receipt-footer { display: flex; justify-content: space-between; margin-top: 40px; font-size: 14px; font-weight: bold; }
+        .sign-line { border-top: 1px dashed #000; width: 150px; text-align: center; padding-top: 5px; }
+
+        @media print {
+            body * { visibility: hidden; }
+            .print-area, .print-area * { visibility: visible; }
+            .print-area { position: absolute; left: 0; top: 0; width: 100%; background: white !important; margin: 0; padding: 15px; box-shadow: none; }
+            .no-print { display: none !important; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Loading Screen -->
+    <div id="loadingOverlay">
+        <div class="loader"></div>
+        <h5 class="fw-bold text-success" id="loadingText">ডেটা লোড হচ্ছে...</h5>
+    </div>
+
+    <!-- Custom Alert Modal -->
+    <div id="customAlertOverlay" class="custom-modal-overlay">
+        <div class="custom-modal-box">
+            <div class="custom-modal-header text-success" id="customAlertTitle">বার্তা</div>
+            <div class="custom-modal-body text-center" id="customAlertMessage">মেসেজ</div>
+            <div class="custom-modal-footer"><button class="custom-modal-btn text-success" onclick="closeCustomAlert()">OK</button></div>
+        </div>
+    </div>
+
+    <!-- Custom Confirm Modal -->
+    <div id="customConfirmOverlay" class="custom-modal-overlay">
+        <div class="custom-modal-box">
+            <div class="custom-modal-header text-danger"><i class="fas fa-exclamation-triangle"></i> নিশ্চিত করুন</div>
+            <div class="custom-modal-body" id="customConfirmMessage">আপনি কি নিশ্চিত?</div>
+            <div class="custom-modal-footer">
+                <button class="custom-modal-btn btn-confirm-cancel" onclick="closeCustomConfirm()">Cancel</button>
+                <button class="custom-modal-btn btn-confirm-ok" id="customConfirmBtn">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= 1. STUDENT LOGIN PAGE ================= -->
+    <div id="studentLoginPage" class="page-view active">
+        <div class="school-header">
+            <p class="bismillah">বিসমিল্লাহির রাহমানির রাহীম</p>
+            <img src="marium.jpg" onerror="this.onerror=null; this.src='https://via.placeholder.com/80/ffffff/1a7844?text=Logo';" alt="School Logo" class="logo">
+            <h2>মরিয়ম ভাট মেমোরিয়াল একাডেমী</h2>
+            <p class="address">মিরগঞ্জ রোড ভাট মসজিদ ব্রীজ সংলগ্ন, মধ্য কেরোয়া, রায়পুর, লক্ষ্মীপুর।</p>
+            <div class="mobile-text"><i class="fas fa-phone-alt me-1"></i> মোবাইল: ০১৭১৮-৬৬৬৩০৬, 01790231775</div>
+        </div>
+        
+        <div class="notice-bar">
+            <i class="fas fa-bell fa-shake"></i>
+            <marquee behavior="scroll" direction="left" scrollamount="5" loop="infinite" class="app-notice-text">
+                ডেটাবেজ থেকে নোটিশ লোড হচ্ছে...
+            </marquee>
+        </div>
+        
+        <div class="container px-3 mt-4 text-center">
+            <div class="section-title-gallery"><i class="fas fa-images"></i> ফটো গ্যালারি</div>
+            
+            <div class="gallery-slider-container mb-4" id="gallery_slider_wrapper">
+                <div class="gallery-slider-track" id="home_gallery_track"></div>
+                <button class="slider-btn prev" onclick="moveGallery(-1)"><i class="fas fa-chevron-left"></i></button>
+                <button class="slider-btn next" onclick="moveGallery(1)"><i class="fas fa-chevron-right"></i></button>
+                <div class="slider-dots" id="home_gallery_dots"></div>
+            </div>
+
+            <h6 class="fw-bold text-success mb-2 text-start"><i class="fas fa-user-graduate"></i> স্টুডেন্ট পোর্টাল লগইন</h6>
+            <div class="card custom-card border-left-teal p-3 text-start shadow-sm">
+                
+                <label class="form-label text-muted fw-bold mb-1">১. ক্লাস নির্বাচন করুন:</label>
+                <select id="login_student_class" class="form-select mb-3 border-success">
+                    <option value="">ক্লাস নির্বাচন করুন *</option>
+                    <option value="ফুলের মেলা">ফুলের মেলা</option>
+                    <option value="প্লে">প্লে</option>
+                    <option value="নার্সারি">নার্সারি</option>
+                    <option value="১ম শ্রেণি">১ম শ্রেণি</option>
+                    <option value="২য় শ্রেণি">২য় শ্রেণি</option>
+                    <option value="৩য় শ্রেণি">৩য় শ্রেণি</option>
+                    <option value="৪র্থ শ্রেণি">৪র্থ শ্রেণি</option>
+                    <option value="৫ম শ্রেণি">৫ম শ্রেণি</option>
+                </select>
+                
+                <label class="form-label text-muted fw-bold mb-1">২. লগিন পিন দিন:</label>
+                <input type="password" inputmode="numeric" id="login_student_pin" class="form-control mb-4 border-success text-center" placeholder="৬ ডিজিটের পিন *" maxlength="6">
+                
+                <button onclick="studentLogin()" class="btn btn-success w-100 fw-bold py-2 fs-5" id="loginBtn"><i class="fas fa-sign-in-alt me-1"></i> প্রবেশ করুন</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= 2. STUDENT DASHBOARD ================= -->
+    <div id="studentDashboard" class="page-view">
+        <div class="school-header">
+            <p class="bismillah">বিসমিল্লাহির রাহমানির রাহীম</p>
+            <img src="marium.jpg" onerror="this.onerror=null; this.src='https://via.placeholder.com/80/ffffff/1a7844?text=Logo';" alt="School Logo" class="logo" style="width: 50px; height: 50px;">
+            <h2>মরিয়ম ভাট মেমোরিয়াল একাডেমী</h2>
+            <p class="address">মিরগঞ্জ রোড ভাট মসজিদ ব্রীজ সংলগ্ন, মধ্য কেরোয়া, রায়পুর, লক্ষ্মীপুর।</p>
+            <div class="mobile-text"><i class="fas fa-phone-alt me-1"></i> মোবাইল: ০১৭১৮-৬৬৬৩০৬, 01790231775</div>
+        </div>
+        
+        <div class="notice-bar mb-3">
+            <i class="fas fa-bell fa-shake"></i>
+            <marquee behavior="scroll" direction="left" scrollamount="5" loop="infinite" class="app-notice-text">নোটিশ...</marquee>
+        </div>
+        
+        <div class="page-title-banner">
+            <i class="fas fa-tachometer-alt me-1"></i> ডিজিটাল স্টুডেন্ট ড্যাশবোর্ড
+        </div>
+
+        <div class="container px-3 mt-3">
+            <div class="card custom-card border-left-teal p-3 mb-3" onclick="showPage('studentProfileDetails')" style="cursor:pointer;">
+                <div class="d-flex align-items-center">
+                    <img src="" id="dash_s_img" class="student-img-sm">
+                    <div class="ms-3">
+                        <h5 class="mb-0 fw-bold text-success" id="dash_s_name">শিক্ষার্থীর নাম</h5>
+                        <small class="text-muted" id="dash_s_info">ক্লাস: | রোল:</small>
+                    </div>
+                    <div class="ms-auto"><i class="fas fa-chevron-right text-muted"></i></div>
+                </div>
+            </div>
+            
+            <div class="card custom-card border-left-warning p-3 mb-4" style="background-color: #fffde7;">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h6 class="fw-bold text-warning mb-0" style="color: #f57f17 !important;"><i class="fas fa-clipboard-check"></i> আজকের হাজিরা স্ট্যাটাস</h6>
+                    <span class="badge bg-warning text-dark" id="dash_s_att_date"></span>
+                </div>
+                <div class="fw-bold text-success border-top border-warning pt-2" style="font-size: 15px;">
+                    <i class="fas fa-info-circle me-1 text-secondary"></i> <span id="attendance_sms_text">তথ্য নেই</span>
+                </div>
+            </div>
+
+            <h6 class="fw-bold text-secondary mb-3">পোর্টাল মেনু:</h6>
+            <div class="row g-3">
+                <div class="col-6">
+                    <div class="dash-cat-box" onclick="openStudentLessons()" style="border-left: 4px solid #9c27b0;">
+                        <i class="fas fa-book-open text-purple" style="color:#9c27b0;"></i>
+                        <h6 class="mt-2">আজকের পড়া</h6>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="dash-cat-box" onclick="openStudentReceipts()" style="border-left: 4px solid #1976d2;">
+                        <i class="fas fa-file-invoice-dollar text-primary"></i>
+                        <h6 class="mt-2">বেতন ও রসিদ</h6>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="dash-cat-box" onclick="openStudentAttendance()" style="border-left: 4px solid #00bcd4;">
+                        <i class="fas fa-user-check text-info"></i>
+                        <h6 class="mt-2">আমার হাজিরা</h6>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="dash-cat-box" onclick="openStudentResults()" style="border-left: 4px solid #1a7844;">
+                        <i class="fas fa-award text-success"></i>
+                        <h6 class="mt-2">পরীক্ষার রেজাল্ট</h6>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="dash-cat-box" onclick="openInbox()" style="border-left: 4px solid #f39c12;">
+                        <i class="fas fa-envelope-open-text text-warning"></i>
+                        <h6 class="mt-2">ইনবক্স (SMS)</h6>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="dash-cat-box" onclick="showPage('schoolDirectory')" style="border-left: 4px solid #d32f2f;">
+                        <i class="fas fa-users text-danger"></i>
+                        <h6 class="mt-2">শিক্ষক ও স্টাফ</h6>
+                    </div>
+                </div>
+                <div class="col-12">
+                    <div class="dash-cat-box py-3" onclick="studentLogout()">
+                        <i class="fas fa-sign-out-alt text-danger" style="font-size: 24px;"></i>
+                        <h6 class="mt-2 text-danger">লগআউট করুন</h6>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Student Full Profile -->
+    <div id="studentProfileDetails" class="page-view">
+        <div class="school-header">
+            <p class="bismillah">বিসমিল্লাহির রাহমানির রাহীম</p>
+            <img src="marium.jpg" onerror="this.onerror=null; this.src='https://via.placeholder.com/80/ffffff/1a7844?text=Logo';" alt="School Logo" class="logo" style="width: 50px; height: 50px;">
+            <h2>মরিয়ম ভাট মেমোরিয়াল একাডেমী</h2>
+            <p class="address">মিরগঞ্জ রোড ভাট মসজিদ ব্রীজ সংলগ্ন, মধ্য কেরোয়া, রায়পুর, লক্ষ্মীপুর।</p>
+            <div class="mobile-text"><i class="fas fa-phone-alt me-1"></i> মোবাইল: ০১৭১৮-৬৬৬৩০৬, 01790231775</div>
+        </div>
+        <div class="notice-bar mb-3">
+            <i class="fas fa-bell fa-shake"></i>
+            <marquee behavior="scroll" direction="left" scrollamount="5" loop="infinite" class="app-notice-text">নোটিশ...</marquee>
+        </div>
+        <div class="page-title-banner">
+            <i class="fas fa-user-circle me-1"></i> আমার প্রোফাইল
+        </div>
+
+        <div class="container px-3 mt-3">
+            <button onclick="showPage('studentDashboard')" class="btn btn-sm btn-outline-secondary mb-3"><i class="fas fa-arrow-left"></i> ড্যাশবোর্ডে যান</button>
+            <div class="card custom-card border-left-teal text-center p-4">
+                <img src="" id="view_sp_img" class="profile-img-lg mx-auto d-block mb-3">
+                <h4 class="fw-bold mb-1 text-success" id="view_sp_name">নাম</h4>
+                <span class="badge bg-success mb-3 px-3 py-2" id="view_sp_class" style="font-size:14px;">ক্লাস</span>
+                
+                <div class="text-start mt-3 pt-2 border-top">
+                    <ul class="list-group list-group-flush profile-list">
+                        <li class="list-group-item"><strong><i class="fas fa-id-card text-muted me-1"></i> আইডি ও রোল:</strong> <span id="view_sp_id" class="fw-bold text-primary"></span></li>
+                        <li class="list-group-item"><strong><i class="fas fa-user-tie text-muted me-1"></i> পিতার নাম:</strong> <span id="view_sp_father"></span></li>
+                        <li class="list-group-item"><strong><i class="fas fa-briefcase text-muted me-1"></i> পিতার পেশা:</strong> <span id="view_sp_father_prof"></span></li>
+                        <li class="list-group-item"><strong><i class="fas fa-female text-muted me-1"></i> মাতার নাম:</strong> <span id="view_sp_mother"></span></li>
+                        <li class="list-group-item"><strong><i class="fas fa-calendar-alt text-muted me-1"></i> জন্ম তারিখ:</strong> <span id="view_sp_dob"></span></li>
+                        <li class="list-group-item"><strong><i class="fas fa-venus-mars text-muted me-1"></i> লিঙ্গ:</strong> <span id="view_sp_gender"></span></li>
+                        <li class="list-group-item"><strong><i class="fas fa-tint text-danger me-1"></i> রক্তের গ্রুপ:</strong> <span id="view_sp_blood" class="fw-bold text-danger"></span></li>
+                        <li class="list-group-item"><strong><i class="fas fa-file-alt text-muted me-1"></i> জন্ম নিবন্ধন নং:</strong> <span id="view_sp_birth_cert"></span></li>
+                        <li class="list-group-item"><strong><i class="fas fa-praying-hands text-muted me-1"></i> ধর্ম:</strong> <span id="view_sp_religion"></span></li>
+                        <li class="list-group-item"><strong><i class="fas fa-bus text-muted me-1"></i> পরিবহন সুবিধা:</strong> <span id="view_sp_transport"></span></li>
+                        <li class="list-group-item" id="li_transport_loc" style="display:none;"><strong><i class="fas fa-map-pin text-muted me-1"></i> উঠার স্থান:</strong> <span id="view_sp_transport_loc"></span></li>
+                        <li class="list-group-item"><strong><i class="fas fa-map-marker-alt text-muted me-1"></i> বর্তমান ঠিকানা:</strong> <span id="view_sp_address"></span></li>
+                        <li class="list-group-item"><strong><i class="fas fa-home text-muted me-1"></i> স্থায়ী ঠিকানা:</strong> <span id="view_sp_per_address"></span></li>
+                        <li class="list-group-item"><strong><i class="fas fa-phone-alt text-muted me-1"></i> মোবাইল:</strong> <span id="view_sp_phone"></span></li>
+                        <li class="list-group-item"><strong><i class="fas fa-calendar-check text-muted me-1"></i> ভর্তির তারিখ:</strong> <span id="view_sp_admit_date"></span></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Today's Lesson Page -->
+    <div id="studentLesson" class="page-view">
+        <div class="school-header">
+            <p class="bismillah">বিসমিল্লাহির রাহমানির রাহীম</p>
+            <img src="marium.jpg" onerror="this.onerror=null; this.src='https://via.placeholder.com/80/ffffff/1a7844?text=Logo';" alt="School Logo" class="logo" style="width: 50px; height: 50px;">
+            <h2>মরিয়ম ভাট মেমোরিয়াল একাডেমী</h2>
+            <p class="address">মিরগঞ্জ রোড ভাট মসজিদ ব্রীজ সংলগ্ন, মধ্য কেরোয়া, রায়পুর, লক্ষ্মীপুর।</p>
+            <div class="mobile-text"><i class="fas fa-phone-alt me-1"></i> মোবাইল: ০১৭১৮-৬৬৬৩০৬, 01790231775</div>
+        </div>
+        <div class="notice-bar mb-3">
+            <i class="fas fa-bell fa-shake"></i>
+            <marquee behavior="scroll" direction="left" scrollamount="5" loop="infinite" class="app-notice-text">নোটিশ...</marquee>
+        </div>
+        <div class="page-title-banner text-purple" style="border-color: #9c27b0; color: #9c27b0;">
+            <i class="fas fa-book-open me-1"></i> আজকের পড়া
+        </div>
+
+        <div class="container px-3 mt-3">
+            <button onclick="showPage('studentDashboard')" class="btn btn-sm btn-outline-secondary mb-3"><i class="fas fa-arrow-left"></i> ড্যাশবোর্ডে যান</button>
+            <div class="card custom-card p-3 border-left-purple mb-3 shadow-sm">
+                <label class="form-label text-muted mb-1 fw-bold">তারিখ দিয়ে পড়া খুঁজুন:</label>
+                <input type="date" id="student_lesson_date" class="form-control" onchange="renderStudentLessons()">
+            </div>
+            <div id="student_lesson_container"></div>
+        </div>
+    </div>
+
+    <!-- ATTENDANCE PAGE WITH DATE FILTER -->
+    <div id="studentAttendance" class="page-view">
+        <div class="school-header">
+            <p class="bismillah">বিসমিল্লাহির রাহমানির রাহীম</p>
+            <img src="marium.jpg" onerror="this.onerror=null; this.src='https://via.placeholder.com/80/ffffff/1a7844?text=Logo';" alt="School Logo" class="logo" style="width: 50px; height: 50px;">
+            <h2>মরিয়ম ভাট মেমোরিয়াল একাডেমী</h2>
+            <p class="address">মিরগঞ্জ রোড ভাট মসজিদ ব্রীজ সংলগ্ন, মধ্য কেরোয়া, রায়পুর, লক্ষ্মীপুর।</p>
+            <div class="mobile-text"><i class="fas fa-phone-alt me-1"></i> মোবাইল: ০১৭১৮-৬৬৬৩০৬, 01790231775</div>
+        </div>
+        <div class="notice-bar mb-3">
+            <i class="fas fa-bell fa-shake"></i>
+            <marquee behavior="scroll" direction="left" scrollamount="5" loop="infinite" class="app-notice-text">নোটিশ...</marquee>
+        </div>
+        <div class="page-title-banner text-info" style="border-color: #00bcd4; color: #00838f;">
+            <i class="fas fa-user-check me-1"></i> হাজিরা রিপোর্ট
+        </div>
+
+        <div class="container px-3 mt-3">
+            <button onclick="showPage('studentDashboard')" class="btn btn-sm btn-outline-secondary mb-3"><i class="fas fa-arrow-left"></i> ড্যাশবোর্ডে যান</button>
+            
+            <div class="card custom-card p-3 mb-3 bg-light shadow-sm">
+                <h6 class="fw-bold mb-2 text-secondary" style="font-size: 14px;"><i class="fas fa-filter"></i> মাস ও বছর অনুযায়ী খুঁজুন:</h6>
+                <div class="row g-2">
+                    <div class="col-6">
+                        <select id="att_filter_year" class="form-select form-select-sm" onchange="filterStudentAttendance()"></select>
+                    </div>
+                    <div class="col-6">
+                        <select id="att_filter_month" class="form-select form-select-sm" onchange="filterStudentAttendance()">
+                            <option value="">সব মাস</option>
+                            <option value="01">জানুয়ারি</option><option value="02">ফেব্রুয়ারি</option>
+                            <option value="03">মার্চ</option><option value="04">এপ্রিল</option>
+                            <option value="05">মে</option><option value="06">জুন</option>
+                            <option value="07">জুলাই</option><option value="08">আগস্ট</option>
+                            <option value="09">সেপ্টেম্বর</option><option value="10">অক্টোবর</option>
+                            <option value="11">নভেম্বর</option><option value="12">ডিসেম্বর</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-2 mb-3 text-center">
+                <div class="col-4"><div class="p-3 rounded bg-white shadow-sm border"><h4 class="mb-0 fw-bold text-primary" id="att_total_days">০</h4><small class="text-muted">মোট দিন</small></div></div>
+                <div class="col-4"><div class="p-3 rounded bg-white shadow-sm border"><h4 class="mb-0 fw-bold text-success" id="att_present_days">০</h4><small class="text-muted">উপস্থিত</small></div></div>
+                <div class="col-4"><div class="p-3 rounded bg-white shadow-sm border"><h4 class="mb-0 fw-bold text-danger" id="att_absent_days">০</h4><small class="text-muted">অনুপস্থিত</small></div></div>
+            </div>
+            <div class="card custom-card p-3 text-center mb-4 border-left-blue">
+                <h6 class="fw-bold mb-0">উপস্থিতির হার: <span id="att_percentage" class="text-primary fw-bold">০%</span></h6>
+            </div>
+
+            <div class="card custom-card p-3 border-left-teal shadow-sm">
+                <h6 class="fw-bold text-success border-bottom pb-2"><i class="fas fa-history"></i> উপস্থিতির তালিকা</h6>
+                <div id="student_attendance_container"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- RECEIPTS HISTORY PAGE WITH DYNAMIC YEAR FILTER -->
+    <div id="studentReceiptsPage" class="page-view">
+        <div class="school-header">
+            <p class="bismillah">বিসমিল্লাহির রাহমানির রাহীম</p>
+            <img src="marium.jpg" onerror="this.onerror=null; this.src='https://via.placeholder.com/80/ffffff/1a7844?text=Logo';" alt="School Logo" class="logo" style="width: 50px; height: 50px;">
+            <h2>মরিয়ম ভাট মেমোরিয়াল একাডেমী</h2>
+            <p class="address">মিরগঞ্জ রোড ভাট মসজিদ ব্রীজ সংলগ্ন, মধ্য কেরোয়া, রায়পুর, লক্ষ্মীপুর।</p>
+            <div class="mobile-text"><i class="fas fa-phone-alt me-1"></i> মোবাইল: ০১৭১৮-৬৬৬৩০৬, 01790231775</div>
+        </div>
+        <div class="notice-bar mb-3">
+            <i class="fas fa-bell fa-shake"></i>
+            <marquee behavior="scroll" direction="left" scrollamount="5" loop="infinite" class="app-notice-text">নোটিশ...</marquee>
+        </div>
+        <div class="page-title-banner text-primary" style="border-color: #1976d2;">
+            <i class="fas fa-file-invoice-dollar me-1"></i> পেমেন্ট ও রশিদ
+        </div>
+
+        <div class="container px-3 mt-3">
+            <button onclick="showPage('studentDashboard')" class="btn btn-sm btn-outline-secondary mb-3"><i class="fas fa-arrow-left"></i> ড্যাশবোর্ডে যান</button>
+            
+            <div class="card custom-card p-3 mb-3 bg-light shadow-sm">
+                <h6 class="fw-bold mb-2 text-secondary" style="font-size: 14px;"><i class="fas fa-filter"></i> মাস ও বছর অনুযায়ী রসিদ খুঁজুন:</h6>
+                <div class="row g-2">
+                    <div class="col-6">
+                        <select id="receipt_filter_year" class="form-select form-select-sm" onchange="filterStudentReceipts()"></select>
+                    </div>
+                    <div class="col-6">
+                        <select id="receipt_filter_month" class="form-select form-select-sm" onchange="filterStudentReceipts()">
+                            <option value="">সব মাস</option>
+                            <option value="01">জানুয়ারি</option><option value="02">ফেব্রুয়ারি</option>
+                            <option value="03">মার্চ</option><option value="04">এপ্রিল</option>
+                            <option value="05">মে</option><option value="06">জুন</option>
+                            <option value="07">জুলাই</option><option value="08">আগস্ট</option>
+                            <option value="09">সেপ্টেম্বর</option><option value="10">অক্টোবর</option>
+                            <option value="11">নভেম্বর</option><option value="12">ডিসেম্বর</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div id="student_receipt_list_container"></div>
+        </div>
+    </div>
+
+    <!-- DIGITAL RECEIPT VIEW PAGE -->
+    <div id="viewReceiptPage" class="page-view" style="background:#fff;">
+        <div class="container px-2 pt-3 pb-5">
+            <button onclick="showPage('studentReceiptsPage')" class="btn btn-sm btn-outline-secondary mb-3 no-print"><i class="fas fa-arrow-left"></i> রসিদ লিস্টে যান</button>
+            
+            <div id="receiptPrintArea" class="receipt-container position-relative print-area">
+                <div class="receipt-header">
+                    <p style="font-size: 11px; margin-bottom: 2px;">বিসমিল্লাহির রাহমানির রাহীম</p>
+                    <div style="position: absolute; left: 10px; top: 15px;"><img src="marium.jpg" onerror="this.style.display='none'" style="width: 50px; height: 50px;"></div>
+                    <h3 style="font-size: 20px; font-weight: 700; margin-bottom: 2px; color: #1976d2;">মরিয়ম ভাট মেমোরিয়াল একাডেমী</h3>
+                    <p style="font-size: 11px; margin-bottom: 2px;">মিরগঞ্জ রোড ভাট মসজিদ ব্রীজ সংলগ্ন, মধ্য কেরোয়া, রায়পুর, লক্ষ্মীপুর।</p>
+                    <p style="font-size: 11px; margin-bottom: 5px;">মোবাইল: ০১৭১৮-৬৬৬৩০৬, 01790231775</p>
+                    <div style="display:inline-block; border: 1px solid #000; border-radius: 15px; padding: 2px 15px; font-weight: bold; font-size: 13px;">টাকা আদায়ের রশিদ</div>
+                </div>
+
+                <div class="d-flex justify-content-between mb-2" style="font-size: 13px; font-weight: bold;">
+                    <div>রশিদ নং- <span id="r_no"></span></div>
+                    <div>তারিখ: <span id="r_date"></span></div>
+                </div>
+                
+                <div style="font-size: 14px; font-weight: bold; margin-bottom: 10px;">
+                    ছাত্র/ছাত্রীর নাম : <span id="r_name" style="border-bottom: 1px dotted #000; display: inline-block; min-width: 60%;"></span><br>
+                    শ্রেণি: <span id="r_class" style="border-bottom: 1px dotted #000; padding: 0 15px; margin-right: 10px;"></span> 
+                    রোল: <span id="r_roll" style="border-bottom: 1px dotted #000; padding: 0 15px;"></span>
+                </div>
+
+                <table class="receipt-table">
+                    <thead><tr><th width="10%" class="text-center">নং</th><th width="65%">বিবরণ</th><th width="25%" class="text-end">টাকার পরিমাণ</th></tr></thead>
+                    <tbody>
+                        <tr><td class="text-center">১</td><td>ভর্তি / পুনঃ ভর্তি / সেশন ফি</td><td class="text-end fw-bold"><span id="r_f1"></span></td></tr>
+                        <tr><td class="text-center">২</td><td>মাসিক বেতন (<span id="r_f2_d"></span>)</td><td class="text-end fw-bold"><span id="r_f2"></span></td></tr>
+                        <tr><td class="text-center">৩</td><td>বকেয়া বেতন</td><td class="text-end fw-bold"><span id="r_f3"></span></td></tr>
+                        <tr><td class="text-center">৪</td><td>মাসিক পরিবহন ফি</td><td class="text-end fw-bold"><span id="r_f4"></span></td></tr>
+                        <tr><td class="text-center">৫</td><td>মাসিক পরীক্ষার ফি</td><td class="text-end fw-bold"><span id="r_f5"></span></td></tr>
+                        <tr><td class="text-center">৬</td><td>পরীক্ষার ফি-১ম সেমি:/২য় সেমি:/সমাপনী</td><td class="text-end fw-bold"><span id="r_f6"></span></td></tr>
+                        <tr><td class="text-center">৭</td><td>সিলেবাস / বই / খাতা</td><td class="text-end fw-bold"><span id="r_f7"></span></td></tr>
+                        <tr><td class="text-center">৮</td><td>ডায়েরী / বেতন কার্ড / প্রগ্রেস রিপোর্ট</td><td class="text-end fw-bold"><span id="r_f8"></span></td></tr>
+                        <tr><td class="text-center">৯</td><td>আইডি কার্ড / সোল্ডার / টাই / পকেট ব্যাজ</td><td class="text-end fw-bold"><span id="r_f9"></span></td></tr>
+                        <tr><td class="text-center">১০</td><td>খেলাধুলা / সাংস্কৃতিক অনুষ্ঠান</td><td class="text-end fw-bold"><span id="r_f10"></span></td></tr>
+                        <tr><td class="text-center">১১</td><td>বিবিধ (<span id="r_f11_d"></span>)</td><td class="text-end fw-bold"><span id="r_f11"></span></td></tr>
+                        <tr><td colspan="2" class="text-end fw-bold pe-3">মোট</td><td class="text-end fw-bold fs-6"><span id="r_total"></span>/-</td></tr>
+                    </tbody>
+                </table>
+                <div style="font-size: 14px; font-weight: bold;">কথায়: <span id="r_words"></span></div>
+                <div class="receipt-footer"><div class="sign-line">অধ্যক্ষ / কর্মকর্তার স্বাক্ষর</div><div class="sign-line">আদায়কারীর স্বাক্ষর</div></div>
+            </div>
+            
+            <div class="mt-4 text-center no-print">
+                <button class="btn btn-success fw-bold px-4 py-2 w-100" onclick="downloadPDF('receiptPrintArea', 'My_Receipt.pdf')"><i class="fas fa-file-pdf"></i> PDF ডাউনলোড করুন</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Results Page -->
+    <div id="studentResultsPage" class="page-view">
+        <div class="school-header">
+            <p class="bismillah">বিসমিল্লাহির রাহমানির রাহীম</p>
+            <img src="marium.jpg" onerror="this.onerror=null; this.src='https://via.placeholder.com/80/ffffff/1a7844?text=Logo';" alt="School Logo" class="logo" style="width: 50px; height: 50px;">
+            <h2>মরিয়ম ভাট মেমোরিয়াল একাডেমী</h2>
+            <p class="address">মিরগঞ্জ রোড ভাট মসজিদ ব্রীজ সংলগ্ন, মধ্য কেরোয়া, রায়পুর, লক্ষ্মীপুর।</p>
+            <div class="mobile-text"><i class="fas fa-phone-alt me-1"></i> মোবাইল: ০১৭১৮-৬৬৬৩০৬, 01790231775</div>
+        </div>
+        <div class="notice-bar mb-3">
+            <i class="fas fa-bell fa-shake"></i>
+            <marquee behavior="scroll" direction="left" scrollamount="5" loop="infinite" class="app-notice-text">নোটিশ...</marquee>
+        </div>
+        <div class="page-title-banner text-success" style="border-color: #1a7844;">
+            <i class="fas fa-award me-1"></i> পরীক্ষার ফলাফল
+        </div>
+
+        <div class="container px-3 mt-3">
+            <button onclick="showPage('studentDashboard')" class="btn btn-sm btn-outline-secondary mb-3"><i class="fas fa-arrow-left"></i> ড্যাশবোর্ডে যান</button>
+            <div id="student_results_container"></div>
+        </div>
+    </div>
+
+    <!-- Student Inbox (SMS) with Send option -->
+    <div id="smsInboxPage" class="page-view">
+        <div class="school-header">
+            <p class="bismillah">বিসমিল্লাহির রাহমানির রাহীম</p>
+            <img src="marium.jpg" onerror="this.onerror=null; this.src='https://via.placeholder.com/80/ffffff/1a7844?text=Logo';" alt="School Logo" class="logo" style="width: 50px; height: 50px;">
+            <h2>মরিয়ম ভাট মেমোরিয়াল একাডেমী</h2>
+            <p class="address">মিরগঞ্জ রোড ভাট মসজিদ ব্রীজ সংলগ্ন, মধ্য কেরোয়া, রায়পুর, লক্ষ্মীপুর।</p>
+            <div class="mobile-text"><i class="fas fa-phone-alt me-1"></i> মোবাইল: ০১৭১৮-৬৬৬৩০৬, 01790231775</div>
+        </div>
+        <div class="notice-bar mb-3">
+            <i class="fas fa-bell fa-shake"></i>
+            <marquee behavior="scroll" direction="left" scrollamount="5" loop="infinite" class="app-notice-text">নোটিশ...</marquee>
+        </div>
+        <div class="page-title-banner text-warning" style="border-color: #f39c12; color:#d35400 !important;">
+            <i class="fas fa-envelope-open-text me-1"></i> ইনবক্স (SMS)
+        </div>
+
+        <div class="container px-3 mt-3">
+            <button onclick="showPage('studentDashboard')" class="btn btn-sm btn-outline-secondary mb-3"><i class="fas fa-arrow-left"></i> ড্যাশবোর্ডে যান</button>
+            
+            <button class="btn btn-warning w-100 mb-4 fw-bold shadow-sm text-dark" onclick="openSendSmsModal()"><i class="fas fa-paper-plane me-2"></i> শিক্ষককে মেসেজ পাঠান</button>
+            
+            <h6 class="fw-bold text-secondary mb-3 border-bottom pb-2">আগত মেসেজ সমূহ:</h6>
+            <div id="student_inbox_container"></div>
+        </div>
+    </div>
+
+    <!-- Modal to Send SMS to Teachers -->
+    <div id="sendSmsModalOverlay" class="custom-modal-overlay">
+        <div class="custom-modal-box">
+            <div class="custom-modal-header text-warning"><i class="fas fa-envelope"></i> নতুন মেসেজ</div>
+            <div class="custom-modal-body text-start">
+                <label class="fw-bold text-muted mb-1">শিক্ষক নির্বাচন করুন:</label>
+                <!-- Enabled for both Headmaster & Teachers -->
+                <select id="sms_teacher_select" class="form-select mb-3 border-warning"></select>
+                
+                <label class="fw-bold text-muted mb-1">আপনার মেসেজ লিখুন:</label>
+                <textarea id="sms_message_text" class="form-control border-warning" rows="4" placeholder="এখানে মেসেজ লিখুন..."></textarea>
+            </div>
+            <div class="custom-modal-footer">
+                <button class="custom-modal-btn btn-confirm-cancel" onclick="closeModal('sendSmsModalOverlay')">বাতিল</button>
+                <button class="custom-modal-btn text-warning fw-bold" onclick="sendSmsToTeacher()">পাঠান</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- School Directory List -->
+    <div id="schoolDirectory" class="page-view">
+        <div class="school-header">
+            <p class="bismillah">বিসমিল্লাহির রাহমানির রাহীম</p>
+            <img src="marium.jpg" onerror="this.onerror=null; this.src='https://via.placeholder.com/80/ffffff/1a7844?text=Logo';" alt="School Logo" class="logo" style="width: 50px; height: 50px;">
+            <h2>মরিয়ম ভাট মেমোরিয়াল একাডেমী</h2>
+            <p class="address">মিরগঞ্জ রোড ভাট মসজিদ ব্রীজ সংলগ্ন, মধ্য কেরোয়া, রায়পুর, লক্ষ্মীপুর।</p>
+            <div class="mobile-text"><i class="fas fa-phone-alt me-1"></i> মোবাইল: ০১৭১৮-৬৬৬৩০৬, 01790231775</div>
+        </div>
+        <div class="notice-bar mb-3">
+            <i class="fas fa-bell fa-shake"></i>
+            <marquee behavior="scroll" direction="left" scrollamount="5" loop="infinite" class="app-notice-text">নোটিশ...</marquee>
+        </div>
+        <div class="page-title-banner text-danger" style="border-color: #d32f2f;">
+            <i class="fas fa-users me-1"></i> শিক্ষক ও স্টাফ পরিচিতি
+        </div>
+
+        <div class="container px-3 mt-3">
+            <button onclick="showPage('studentDashboard')" class="btn btn-sm btn-outline-secondary mb-3"><i class="fas fa-arrow-left"></i> ড্যাশবোর্ডে যান</button>
+            <div id="directory_list_container"></div>
+        </div>
+    </div>
+
+    <!-- Staff Full Profile Detail Page -->
+    <div id="staffProfileDetailView" class="page-view">
+        <div class="school-header">
+            <p class="bismillah">বিসমিল্লাহির রাহমানির রাহীম</p>
+            <img src="marium.jpg" onerror="this.onerror=null; this.src='https://via.placeholder.com/80/ffffff/1a7844?text=Logo';" alt="School Logo" class="logo" style="width: 50px; height: 50px;">
+            <h2>মরিয়ম ভাট মেমোরিয়াল একাডেমী</h2>
+            <p class="address">মিরগঞ্জ রোড ভাট মসজিদ ব্রীজ সংলগ্ন, মধ্য কেরোয়া, রায়পুর, লক্ষ্মীপুর।</p>
+            <div class="mobile-text"><i class="fas fa-phone-alt me-1"></i> মোবাইল: ০১৭১৮-৬৬৬৩০৬, 01790231775</div>
+        </div>
+        <div class="notice-bar mb-3">
+            <i class="fas fa-bell fa-shake"></i>
+            <marquee behavior="scroll" direction="left" scrollamount="5" loop="infinite" class="app-notice-text">নোটিশ...</marquee>
+        </div>
+
+        <div class="container px-3 mt-3">
+            <button onclick="showPage('schoolDirectory')" class="btn btn-sm btn-outline-secondary mb-3"><i class="fas fa-arrow-left"></i> ডিরেক্টরিতে ফিরে যান</button>
+            
+            <div class="card custom-card border-left-blue text-center p-4 shadow-sm">
+                <img src="" id="dir_prof_img" class="profile-img-lg mx-auto d-block mb-3 border-primary">
+                <h4 class="fw-bold mb-1 text-primary" id="dir_prof_name">নাম</h4>
+                <div class="badge bg-primary mb-3 px-3 py-2" id="dir_prof_desig" style="font-size:14px;">পদবি</div>
+                
+                <a href="#" id="dir_prof_call_btn" class="btn btn-primary fw-bold w-100 mb-4 py-2" style="font-size: 16px; background-color: #1a73e8; border-color: #1a73e8;"><i class="fas fa-phone-alt me-2"></i> কল করুন</a>
+
+                <div class="text-start border-top pt-3">
+                    <ul class="list-group list-group-flush profile-list">
+                        <li class="list-group-item"><strong><i class="fas fa-id-card text-muted me-1"></i> আইডি:</strong> <span id="dir_prof_id"></span></li>
+                        <li class="list-group-item"><strong><i class="fas fa-user-tie text-muted me-1"></i> পিতার নাম:</strong> <span id="dir_prof_father"></span></li>
+                        <li class="list-group-item"><strong><i class="fas fa-calendar-day text-muted me-1"></i> জন্ম তারিখ:</strong> <span id="dir_prof_dob"></span></li>
+                        <li class="list-group-item"><strong><i class="fas fa-venus-mars text-muted me-1"></i> লিঙ্গ:</strong> <span id="dir_prof_gender"></span></li>
+                        <li class="list-group-item"><strong><i class="fas fa-tint text-danger me-1"></i> রক্তের গ্রুপ:</strong> <span id="dir_prof_blood" class="fw-bold text-danger"></span></li>
+                        <li class="list-group-item"><strong><i class="fas fa-id-badge text-muted me-1"></i> এনআইডি (NID):</strong> <span id="dir_prof_nid"></span></li>
+                        <li class="list-group-item"><strong><i class="fas fa-graduation-cap text-muted me-1"></i> শিক্ষাগত যোগ্যতা:</strong> <span id="dir_prof_edu"></span></li>
+                        <li class="list-group-item"><strong><i class="fas fa-map-marker-alt text-muted me-1"></i> ঠিকানা:</strong> <span id="dir_prof_address"></span></li>
+                        <li class="list-group-item"><strong><i class="fas fa-phone-alt text-muted me-1"></i> মোবাইল:</strong> <span id="dir_prof_phone"></span></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ================= JAVASCRIPT & SERVICE WORKER ================= -->
+    <script>
+        // PWA & Auto-update Service Worker (ক্যাশে ফিক্স ও অফলাইন সাপোর্ট)
+        const swCode = `
+        const CACHE_NAME = 'mb-academy-student-v1';
+        self.addEventListener('install', event => {
+            self.skipWaiting();
+            event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll([ location.href ])));
+        });
+        self.addEventListener('activate', event => {
+            event.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))));
+            self.clients.claim();
+        });
+        self.addEventListener('fetch', event => {
+            event.respondWith(
+                fetch(event.request).then(res => {
+                    const resClone = res.clone();
+                    caches.open(CACHE_NAME).then(cache => cache.put(event.request, resClone));
+                    return res;
+                }).catch(() => caches.match(event.request))
+            );
+        });
+        `;
+        const blob = new Blob([swCode], {type: 'application/javascript'});
+        const swUrl = URL.createObjectURL(blob);
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register(swUrl).catch(console.error);
+        }
+
+        // Firebase Setup
+        const firebaseConfig = {
+            apiKey: "AIzaSyCTkYVRcTvIbQNeHQLia9tgMhHzldRP22c",
+            authDomain: "marium-bhat.firebaseapp.com",
+            databaseURL: "https://marium-bhat-default-rtdb.firebaseio.com",
+            projectId: "marium-bhat",
+            storageBucket: "marium-bhat.firebasestorage.app",
+            messagingSenderId: "796671453784",
+            appId: "1:796671453784:web:52c245c94a052f13ffb82d"
+        };
+        if(!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
+        const database = firebase.database();
+
+        // Local cache variables
+        let studentsData = [];
+        let teachersData = [];
+        let staffData = [];
+        let headmasterData = {};
+        let galleryImages = [];
+        
+        let currentStudent = null;
+        let currentSlide = 0;
+        let slideInterval;
+
+        document.addEventListener("DOMContentLoaded", function() {
+            populateYearDropdowns();
+            startFirebaseSync();
+            
+            let today = getTodayISODate();
+            let dateInput = document.getElementById('student_lesson_date');
+            if(dateInput) dateInput.value = today;
+
+            let sliderWrapper = document.getElementById('gallery_slider_wrapper');
+            if(sliderWrapper) {
+                sliderWrapper.addEventListener('mouseenter', stopAutoSlide);
+                sliderWrapper.addEventListener('mouseleave', startAutoSlide);
+            }
+            
+            // Backup clear for loader
+            setTimeout(() => { 
+                let loader = document.getElementById('loadingOverlay');
+                if(loader) loader.style.opacity = '0';
+                setTimeout(() => { if(loader) loader.style.display = 'none'; }, 500);
+            }, 2000);
+        });
+
+        function populateYearDropdowns() {
+            let currentYear = new Date().getFullYear();
+            let receiptYearEl = document.getElementById('receipt_filter_year');
+            let attYearEl = document.getElementById('att_filter_year');
+            
+            let options = '<option value="">সব বছর</option>';
+            let startYear = 2026;
+            let maxYear = Math.max(currentYear, startYear);
+            
+            for(let y = maxYear; y >= startYear; y--) {
+                options += `<option value="${y}" ${y === maxYear ? 'selected' : ''}>${toBanglaNum(y)}</option>`;
+            }
+            
+            if(receiptYearEl) receiptYearEl.innerHTML = options;
+            if(attYearEl) attYearEl.innerHTML = options;
+        }
+
+        function startFirebaseSync() {
+            database.ref('students').on('value', snap => {
+                if(snap.exists()) {
+                    studentsData = [];
+                    snap.forEach(child => {
+                        let std = child.val();
+                        std.dbKey = child.key;
+                        studentsData.push(std);
+                    });
+                }
+                
+                let loader = document.getElementById('loadingOverlay');
+                if(loader) {
+                    loader.style.opacity = '0';
+                    setTimeout(() => { loader.style.display = 'none'; }, 500);
+                }
+
+                if(!currentStudent) {
+                    checkAutoLogin();
+                } else {
+                    let updated = studentsData.find(s => s.dbKey === currentStudent.dbKey);
+                    if(updated) { 
+                        currentStudent = updated; 
+                        populateDashboard();
+                        
+                        if(document.getElementById('smsInboxPage').classList.contains('active')) updateInboxUI();
+                        if(document.getElementById('studentReceiptsPage').classList.contains('active')) filterStudentReceipts();
+                        if(document.getElementById('studentAttendance').classList.contains('active')) filterStudentAttendance();
+                    }
+                }
+            });
+
+            database.ref('headmaster').on('value', snap => { if(snap.exists()) { headmasterData = snap.val(); renderDirectory(); } });
+            database.ref('teachers').on('value', snap => { if(snap.exists()){ teachersData = []; snap.forEach(c => teachersData.push(c.val())); renderDirectory(); } });
+            database.ref('staff').on('value', snap => { if(snap.exists()){ staffData = []; snap.forEach(c => staffData.push(c.val())); renderDirectory(); } });
+            
+            // Advanced Lessons Sync
+            database.ref('lessons').on('value', snap => { 
+                window.rawLessonsNode = snap.val() || {};
+                if(currentStudent && document.getElementById('studentLesson').classList.contains('active')) {
+                    renderStudentLessons(); 
+                }
+            });
+            
+            database.ref('gallery').on('value', snap => { if(snap.exists()){ galleryImages = []; snap.forEach(c => galleryImages.push(c.val())); renderGallerySlider(); } });
+            
+            database.ref('notice').on('value', snap => {
+                if(snap.exists()){
+                    let noticeData = snap.val();
+                    let text = typeof noticeData === 'object' ? noticeData.text : noticeData;
+                    document.querySelectorAll('.app-notice-text').forEach(el => el.innerText = text || "কোনো নতুন নোটিশ নেই।");
+                }
+            });
+        }
+
+        // Utilities
+        function toBanglaNum(num) { const b = { '0': '০', '1': '১', '2': '২', '3': '৩', '4': '৪', '5': '৫', '6': '৬', '7': '৭', '8': '৮', '9': '৯' }; return String(num).replace(/[0-9]/g, x => b[x] || x); }
+        function toEnglishNum(numStr) { const e = {'০': '0', '১': '1', '২': '2', '৩': '3', '৪': '4', '৫': '5', '৬': '6', '৭': '7', '৮': '8', '৯': '9'}; return String(numStr).replace(/[০-৯]/g, x => e[x] || x); }
+        function getTodayISODate() { const d = new Date(); let m = '' + (d.getMonth() + 1), day = '' + d.getDate(), y = d.getFullYear(); if (m.length < 2) m = '0' + m; if (day.length < 2) day = '0' + day; return [y, m, day].join('-'); }
+        function toBanglaDate(isoDate) { if(!isoDate) return ""; const months = ["জানুয়ারি", "ফেব্রুয়ারি", "মার্চ", "এপ্রিল", "মে", "জুন", "জুলাই", "আগস্ট", "সেপ্টেম্বর", "অক্টোবর", "নভেম্বর", "ডিসেম্বর"]; const p = isoDate.split('-'); if(p.length !== 3) return isoDate; return toBanglaNum(parseInt(p[2])) + " " + months[parseInt(p[1]) - 1] + " " + toBanglaNum(p[0]); }
+        function safeSetText(id, val) { let el = document.getElementById(id); if(el) el.innerText = val; }
+
+        function showPage(pageId) { 
+            document.querySelectorAll('.page-view').forEach(p => p.classList.remove('active')); 
+            let activePage = document.getElementById(pageId);
+            activePage.classList.add('active'); 
+            window.scrollTo(0, 0); 
+            
+            let marquees = activePage.querySelectorAll('marquee');
+            marquees.forEach(m => { m.stop(); setTimeout(() => m.start(), 50); });
+        }
+        
+        function customAlert(msg) { document.getElementById('customAlertMessage').innerText = msg; document.getElementById('customAlertOverlay').style.display = 'flex'; }
+        function closeCustomAlert() { document.getElementById('customAlertOverlay').style.display = 'none'; }
+        function closeModal(modalId) { document.getElementById(modalId).style.display = 'none'; }
+        
+        function customConfirm(msg, callback) { document.getElementById('customConfirmMessage').innerText = msg; currentConfirmAction = callback; document.getElementById('customConfirmOverlay').style.display = 'flex'; }
+        function closeCustomConfirm() { document.getElementById('customConfirmOverlay').style.display = 'none'; currentConfirmAction = null; }
+        document.getElementById('customConfirmBtn').addEventListener('click', function() { if(currentConfirmAction) currentConfirmAction(); closeCustomConfirm(); });
+
+        // Auto Login System (Class + Pin)
+        function checkAutoLogin() {
+            let savedClass = localStorage.getItem('studentAppClass');
+            let savedPinRaw = localStorage.getItem('studentAppPin');
+            
+            if(savedClass && savedPinRaw && studentsData.length > 0) {
+                let pin = toEnglishNum(savedPinRaw);
+                let std = studentsData.find(s => {
+                    let dbClass = (s.class || "").trim();
+                    let dbPin = String(s.loginPin || "").trim();
+                    let classMatch = (dbClass === savedClass.trim());
+                    let pinMatch = (dbPin === pin) || (dbPin === "" && pin === "123456");
+                    return classMatch && pinMatch;
+                });
+
+                if(std) {
+                    currentStudent = std;
+                    window.studentDbKey = std.dbKey;
+                    populateDashboard();
+                    showPage('studentDashboard');
+                }
+            }
+        }
+
+        // Gallery Slider
+        function renderGallerySlider() {
+            let track = document.getElementById('home_gallery_track'); let dotsContainer = document.getElementById('home_gallery_dots'); if(!track) return; track.innerHTML = ''; dotsContainer.innerHTML = '';
+            if(galleryImages.length === 0) { track.innerHTML = '<div class="gallery-slide d-flex align-items-center justify-content-center text-white w-100 bg-dark">গ্যালারিতে কোনো ছবি নেই</div>'; return; }
+            galleryImages.forEach((imgObj, idx) => { 
+                let imgUrl = typeof imgObj === 'string' ? imgObj : imgObj.url;
+                track.innerHTML += `<img src="${imgUrl}" class="gallery-slide">`; 
+                dotsContainer.innerHTML += `<span class="slider-dot ${idx === 0 ? 'active' : ''}" onclick="goToSlide(${idx})"></span>`; 
+            });
+            updateSliderPosition(); stopAutoSlide(); startAutoSlide();
+        }
+        function moveGallery(dir) { if(galleryImages.length === 0) return; currentSlide += dir; if(currentSlide < 0) currentSlide = galleryImages.length - 1; if(currentSlide >= galleryImages.length) currentSlide = 0; updateSliderPosition(); }
+        function goToSlide(idx) { currentSlide = idx; updateSliderPosition(); stopAutoSlide(); startAutoSlide(); }
+        function updateSliderPosition() { let track = document.getElementById('home_gallery_track'); if(!track) return; track.style.transform = `translateX(-${currentSlide * 100}%)`; let dots = document.querySelectorAll('.slider-dot'); dots.forEach((dot, idx) => { if(idx === currentSlide) dot.classList.add('active'); else dot.classList.remove('active'); }); }
+        function startAutoSlide() { slideInterval = setInterval(() => { moveGallery(1); }, 3000); }
+        function stopAutoSlide() { clearInterval(slideInterval); }
+
+        // Login Logic (Only Class + PIN)
+        function studentLogin() {
+            let selectedClass = document.getElementById('login_student_class').value;
+            let pinRaw = document.getElementById('login_student_pin').value.trim();
+
+            if(!selectedClass || !pinRaw) { 
+                customAlert("অনুগ্রহ করে আপনার ক্লাস এবং পিন নম্বর সঠিকভাবে প্রদান করুন!"); 
+                return; 
+            }
+
+            let pin = toEnglishNum(pinRaw);
+
+            if(studentsData.length === 0) {
+                customAlert("ডাটাবেজে কোনো তথ্য পাওয়া যায়নি, অথবা ইন্টারনেট সংযোগ চেক করুন।");
+                return;
+            }
+
+            let studentFound = false;
+
+            for(let i = 0; i < studentsData.length; i++) {
+                let std = studentsData[i];
+                let dbClass = (std.class || "").trim();
+                let dbPin = String(std.loginPin || "").trim();
+
+                if (dbClass === selectedClass.trim() && (dbPin === pin || (dbPin === "" && pin === "123456"))) {
+                    studentFound = true;
+                    performLogin(std, selectedClass, pinRaw);
+                    break;
+                }
+            }
+            
+            if(!studentFound) {
+                customAlert("ভুল ক্লাস অথবা পিন (PIN) দিয়েছেন। অনুগ্রহ করে আবার চেষ্টা করুন।");
+            }
+        }
+        
+        function performLogin(student, selectedClass, pinRaw) {
+            currentStudent = student;
+            window.studentDbKey = student.dbKey;
+            localStorage.setItem('studentAppClass', selectedClass.trim());
+            localStorage.setItem('studentAppPin', pinRaw);
+            
+            populateDashboard();
+            showPage('studentDashboard');
+            document.getElementById('login_student_class').value = '';
+            document.getElementById('login_student_pin').value = '';
+        }
+
+        function studentLogout() {
+            currentStudent = null;
+            window.studentDbKey = null;
+            localStorage.removeItem('studentAppClass');
+            localStorage.removeItem('studentAppPin');
+            showPage('studentLoginPage');
+        }
+
+        function populateDashboard() {
+            if(!currentStudent) return;
+            
+            safeSetText('dash_s_name', currentStudent.name);
+            safeSetText('dash_s_info', `রোল: ${toBanglaNum(currentStudent.roll || currentStudent.id)} | ${currentStudent.class}`);
+            
+            let imgUrl = currentStudent.photo || currentStudent.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(currentStudent.name)}&background=1a7844&color=fff`;
+            let dImg = document.getElementById('dash_s_img'); if(dImg) dImg.src = imgUrl;
+            let vImg = document.getElementById('view_sp_img'); if(vImg) vImg.src = imgUrl;
+
+            safeSetText('view_sp_name', currentStudent.name);
+            safeSetText('view_sp_class', currentStudent.class);
+            safeSetText('view_sp_id', toBanglaNum(currentStudent.roll || currentStudent.id));
+            safeSetText('view_sp_father', currentStudent.father || '---');
+            safeSetText('view_sp_father_prof', currentStudent.fatherProf || '---');
+            safeSetText('view_sp_mother', currentStudent.mother || '---');
+            safeSetText('view_sp_dob', (currentStudent.dob && currentStudent.dob !== '---') ? toBanglaDate(currentStudent.dob) : '---');
+            safeSetText('view_sp_gender', currentStudent.gender || '---');
+            safeSetText('view_sp_blood', currentStudent.bloodGroup || '---');
+            safeSetText('view_sp_birth_cert', currentStudent.birthCert || '---');
+            safeSetText('view_sp_religion', currentStudent.religion || '---');
+            
+            let transText = currentStudent.transport === 'Yes' ? 'হ্যাঁ' : 'না';
+            safeSetText('view_sp_transport', transText);
+            
+            let liTrans = document.getElementById('li_transport_loc');
+            if(liTrans) {
+                if(currentStudent.transport === 'Yes') {
+                    liTrans.style.display = 'block';
+                    safeSetText('view_sp_transport_loc', currentStudent.transportLoc || '---');
+                } else {
+                    liTrans.style.display = 'none';
+                }
+            }
+
+            safeSetText('view_sp_address', currentStudent.address || currentStudent.perAddress || '---');
+            safeSetText('view_sp_per_address', currentStudent.perAddress || '---');
+            safeSetText('view_sp_phone', currentStudent.phone || '---');
+            safeSetText('view_sp_admit_date', (currentStudent.admitDate && currentStudent.admitDate !== '---') ? toBanglaDate(currentStudent.admitDate) : '---'); 
+
+            let todayISO = getTodayISODate();
+            let statusText = "আজকের হাজিরা এখনো দেওয়া হয়নি।";
+            let textEl = document.getElementById('attendance_sms_text');
+            if(textEl) {
+                textEl.className = "text-secondary";
+                if(currentStudent.attendance && currentStudent.attendance[todayISO]) {
+                    if(currentStudent.attendance[todayISO] === 'Present') {
+                        statusText = "আপনি আজ উপস্থিত আছেন। ধন্যবাদ!";
+                        textEl.className = "text-success fw-bold";
+                    } else {
+                        statusText = "আপনি আজ অনুপস্থিত আছেন!";
+                        textEl.className = "text-danger fw-bold";
+                    }
+                }
+                textEl.innerText = statusText;
+            }
+            safeSetText('dash_s_att_date', toBanglaDate(todayISO));
+        }
+
+        // Date Matcher Helper for Lessons
+        function isDateMatch(dbDate, filterDateISO) {
+            if(!dbDate || !filterDateISO) return false;
+            let cDate = toEnglishNum(dbDate).trim();
+            if(cDate === filterDateISO) return true;
+            let parts = cDate.split(/[-/ ,]/).filter(x => x !== "");
+            let fParts = filterDateISO.split('-'); 
+            
+            if(parts.length >= 3) {
+                let dY = parts[0].length >= 4 ? parts[0] : (parts[2].length >= 4 ? parts[2] : "");
+                let dM = parts[0].length >= 4 ? parts[1] : parts[1];
+                let dD = parts[0].length >= 4 ? parts[2] : parts[0];
+                
+                if(dM && dM.length === 1) dM = "0" + dM;
+                if(dD && dD.length === 1) dD = "0" + dD;
+                
+                if(dY === fParts[0] && dM === fParts[1] && dD === fParts[2]) return true;
+            }
+            return false;
+        }
+
+        // Advanced Lesson Sync (Class & Subject wise with image support)
+        function openStudentLessons() {
+            if(!currentStudent) return;
+            document.getElementById('student_lesson_date').value = getTodayISODate();
+            renderStudentLessons();
+            showPage('studentLesson');
+        }
+
+        function renderStudentLessons() {
+            if(!currentStudent) return;
+            let date = document.getElementById('student_lesson_date').value;
+            let container = document.getElementById('student_lesson_container');
+            container.innerHTML = '';
+            let hasData = false;
+
+            if (window.rawLessonsNode) {
+                for(let key in window.rawLessonsNode) {
+                    let item = window.rawLessonsNode[key];
+                    
+                    if(typeof item === 'object' && item !== null) {
+                        let lClass = (item.class || "").trim();
+                        let matchClass = (lClass === currentStudent.class.trim() || lClass === 'All' || lClass === 'সকল ক্লাস' || lClass === 'সকল' || lClass === '');
+                        
+                        // Condition 1: Flat Lesson Structure
+                        if (matchClass && isDateMatch(item.date, date)) {
+                            hasData = true;
+                            appendLessonCard(item, container);
+                            continue;
+                        }
+                        
+                        // Condition 2: Deeply Nested / Grouped Structure (e.g. lessons -> className -> pushId -> {subject, details})
+                        if (key.trim() === currentStudent.class.trim() || key === 'All' || key === 'সকল ক্লাস') {
+                             for(let subKey in item) {
+                                 let subItem = item[subKey];
+                                 if(typeof subItem === 'object' && subItem !== null) {
+                                     // Format A: lessons -> class -> date -> { subject: details }
+                                     if (isDateMatch(subKey, date)) {
+                                         hasData = true;
+                                         if(subItem.subject || subItem.details || subItem.image || subItem.bangla) {
+                                             appendLessonCard(subItem, container);
+                                         } else {
+                                             for(let ssKey in subItem) {
+                                                 let ssItem = subItem[ssKey];
+                                                 if(typeof ssItem === 'object') {
+                                                     appendLessonCard(ssItem, container);
+                                                 } else if (typeof ssItem === 'string') {
+                                                     appendLessonCard({subject: ssKey, details: ssItem}, container);
+                                                 }
+                                             }
+                                         }
+                                     } 
+                                     // Format B: lessons -> class -> pushId -> { date, subject, details }
+                                     else if (isDateMatch(subItem.date, date)) {
+                                         hasData = true;
+                                         appendLessonCard(subItem, container);
+                                     }
+                                 }
+                             }
+                        }
+                    }
+                }
+            }
+
+            if(!hasData) {
+                container.innerHTML = `<div class="card p-4 text-center text-muted border-0 shadow-sm"><i class="fas fa-book-reader mb-2" style="font-size:30px;"></i>এই তারিখে কোনো পড়া দেওয়া হয়নি।</div>`;
+            }
+        }
+        
+        function appendLessonCard(l, container) {
+            let subj = l.subject || l.subjectName || 'সাধারণ পাঠ';
+            let details = l.details || l.text || l.bangla || l.english || l.math || l.general || '';
+            if(!details && !l.image) return; // Ignore empty entries
+            
+            let imgHtml = l.image ? `<img src="${l.image}" class="img-fluid mt-3 rounded border" style="max-height: 250px; width:100%; object-fit: cover;">` : '';
+            let dateStr = l.date ? toBanglaDate(l.date) : '';
+            
+            container.innerHTML += `
+            <div class="card custom-card border-left-purple p-3 mb-3 shadow-sm">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <span class="badge bg-purple" style="background-color: #9c27b0; font-size:14px;">${subj}</span>
+                    <small class="text-muted fw-bold">${dateStr}</small>
+                </div>
+                <p class="mb-0 text-dark" style="font-size: 15px; line-height: 1.6;">${details}</p>
+                ${imgHtml}
+            </div>`;
+        }
+
+        // Student Receipts
+        function openStudentReceipts() {
+            if(!currentStudent) return;
+            filterStudentReceipts(); 
+            showPage('studentReceiptsPage');
+        }
+
+        function filterStudentReceipts() {
+            if(!currentStudent) return;
+            let container = document.getElementById('student_receipt_list_container');
+            container.innerHTML = '';
+            
+            let fYear = document.getElementById('receipt_filter_year').value;
+            let fMonth = document.getElementById('receipt_filter_month').value;
+
+            if(!currentStudent.receipts || Object.keys(currentStudent.receipts).length === 0) {
+                container.innerHTML = `<div class="card p-4 text-center text-muted border-0 shadow-sm"><i class="fas fa-file-invoice-dollar mb-2" style="font-size:30px;"></i>কোনো পেমেন্ট রসিদ পাওয়া যায়নি।</div>`;
+                return;
+            }
+
+            let rArray = Array.isArray(currentStudent.receipts) ? currentStudent.receipts : Object.keys(currentStudent.receipts).map(k => currentStudent.receipts[k]);
+            
+            const monthNames = {
+                "01": ["জানুয়ারি", "জানুয়ারি", "january", "01", "1"],
+                "02": ["ফেব্রুয়ারি", "ফেব্রুয়ারী", "february", "02", "2"],
+                "03": ["মার্চ", "march", "03", "3"],
+                "04": ["এপ্রিল", "april", "04", "4"],
+                "05": ["মে", "may", "05", "5"],
+                "06": ["জুন", "june", "06", "6"],
+                "07": ["জুলাই", "july", "07", "7"],
+                "08": ["আগস্ট", "august", "08", "8"],
+                "09": ["সেপ্টেম্বর", "september", "09", "9"],
+                "10": ["অক্টোবর", "october", "10"],
+                "11": ["নভেম্বর", "november", "11"],
+                "12": ["ডিসেম্বর", "december", "12"]
+            };
+
+            let filteredReceipts = rArray.filter(r => {
+                if(!r) return false;
+                
+                let rY = "", rM = "";
+                if(r.year) rY = toEnglishNum(r.year);
+                if(r.month) rM = r.month.toString().toLowerCase().trim();
+                
+                if((!rY || !rM) && r.date) {
+                    let enDate = toEnglishNum(r.date);
+                    let parts = enDate.split(/[-/ ,]/).filter(x => x !== ""); 
+                    if(parts.length >= 3) {
+                        if(parts[0].length <= 2 && parts[2].length >= 4) { rY = parts[2]; rM = parts[1]; } 
+                        else if (parts[0].length >= 4) { rY = parts[0]; rM = parts[1]; } 
+                    }
+                }
+                
+                if(rM && rM.length === 1) rM = "0" + rM; 
+                
+                let matchY = (fYear === "") || (rY === fYear);
+                let matchM = false;
+                
+                if(fMonth === "") {
+                    matchM = true;
+                } else {
+                    let allowedMonths = monthNames[fMonth] || [];
+                    if(allowedMonths.includes(rM) || (r.month && allowedMonths.includes(r.month.toString().toLowerCase().trim()))) {
+                        matchM = true;
+                    }
+                }
+                
+                return matchY && matchM;
+            });
+
+            if(filteredReceipts.length === 0) {
+                 container.innerHTML = `<div class="card p-4 text-center text-muted border-0 shadow-sm"><i class="fas fa-file-invoice-dollar mb-2" style="font-size:30px;"></i>এই নির্দিষ্ট মাস/বছরের কোনো রসিদ পাওয়া যায়নি।</div>`;
+                 return;
+            }
+
+            filteredReceipts.reverse().forEach(r => {
+                let rJson = encodeURIComponent(JSON.stringify(r));
+                let displayDate = (r.date && r.date.includes('-') && r.date.split('-')[0].length === 4) ? toBanglaDate(r.date) : r.date;
+
+                container.innerHTML += `
+                <div class="student-list-item border-left-blue shadow-sm" style="cursor:pointer;" onclick="viewReceiptDetail('${rJson}')">
+                    <div>
+                        <h6 class="mb-0 fw-bold text-primary">রশিদ নং: ${toBanglaNum(r.rNo)}</h6>
+                        <small class="text-muted"><i class="far fa-calendar-alt"></i> ${displayDate}</small>
+                    </div>
+                    <div class="text-end">
+                        <h6 class="text-success fw-bold mb-0">৳ ${toBanglaNum(r.total)}</h6>
+                        <button class="btn btn-sm btn-outline-primary mt-1 px-3">রশিদ দেখুন</button>
+                    </div>
+                </div>`;
+            });
+        }
+
+        function viewReceiptDetail(encodedData) {
+            let data = JSON.parse(decodeURIComponent(encodedData));
+            let displayDate = (data.date && data.date.includes('-') && data.date.split('-')[0].length === 4) ? toBanglaDate(data.date) : data.date;
+
+            safeSetText('r_no', toBanglaNum(data.rNo));
+            safeSetText('r_date', displayDate);
+            safeSetText('r_name', data.name);
+            safeSetText('r_class', data.class);
+            safeSetText('r_roll', toBanglaNum(data.roll));
+            
+            safeSetText('r_f1', toBanglaNum(data.f1 || 0));
+            safeSetText('r_f2', toBanglaNum(data.f2 || 0));
+            safeSetText('r_f2_d', data.f2d || '');
+            safeSetText('r_f3', toBanglaNum(data.f3 || 0));
+            safeSetText('r_f4', toBanglaNum(data.f4 || 0));
+            safeSetText('r_f5', toBanglaNum(data.f5 || 0));
+            safeSetText('r_f6', toBanglaNum(data.f6 || 0));
+            safeSetText('r_f7', toBanglaNum(data.f7 || 0));
+            safeSetText('r_f8', toBanglaNum(data.f8 || 0));
+            safeSetText('r_f9', toBanglaNum(data.f9 || 0));
+            safeSetText('r_f10', toBanglaNum(data.f10 || 0));
+            safeSetText('r_f11', toBanglaNum(data.f11 || 0));
+            safeSetText('r_f11_d', data.f11d || '');
+            
+            safeSetText('r_total', toBanglaNum(data.total));
+            safeSetText('r_words', (data.words || "শূন্য") + " টাকা মাত্র।");
+            
+            showPage('viewReceiptPage');
+        }
+
+        // Student Attendance
+        function openStudentAttendance() {
+            if(!currentStudent) return;
+            filterStudentAttendance();
+            showPage('studentAttendance');
+        }
+
+        function filterStudentAttendance() {
+            if(!currentStudent) return;
+            let container = document.getElementById('student_attendance_container');
+            container.innerHTML = '';
+            
+            let fYear = document.getElementById('att_filter_year').value;
+            let fMonth = document.getElementById('att_filter_month').value;
+
+            let present = 0, absent = 0, total = 0;
+            if(currentStudent.attendance) {
+                let dates = Object.keys(currentStudent.attendance).sort().reverse();
+                
+                let filteredDates = dates.filter(d => {
+                    let enDate = toEnglishNum(d);
+                    let parts = enDate.split(/[-/]/);
+                    if(parts.length >= 3) {
+                        let rY = parts[0].length === 4 ? parts[0] : parts[2];
+                        let rM = parts[1];
+                        if(rM.length === 1) rM = "0" + rM;
+
+                        let matchY = fYear === "" || rY === fYear;
+                        let matchM = fMonth === "" || rM === fMonth;
+                        return matchY && matchM;
+                    }
+                    return true;
+                });
+
+                total = filteredDates.length;
+                filteredDates.forEach(d => {
+                    let status = currentStudent.attendance[d];
+                    if(status === 'Present') present++; else if(status === 'Absent') absent++;
+                    let badge = status === 'Present' ? '<span class="badge bg-success">উপস্থিত</span>' : '<span class="badge bg-danger">অনুপস্থিত</span>';
+                    container.innerHTML += `
+                    <div class="d-flex justify-content-between align-items-center border-bottom py-2 px-2">
+                        <span class="fw-bold text-dark"><i class="far fa-calendar-alt text-muted me-2"></i>${toBanglaDate(d)}</span>
+                        <span>${badge}</span>
+                    </div>`;
+                });
+            }
+
+            if(total === 0) {
+                container.innerHTML = `<p class="text-center text-muted mb-0 pt-3 pb-3">এই মাসের কোনো হাজিরার তথ্য নেই।</p>`;
+            }
+
+            safeSetText('att_total_days', toBanglaNum(total));
+            safeSetText('att_present_days', toBanglaNum(present));
+            safeSetText('att_absent_days', toBanglaNum(absent));
+            let percent = total > 0 ? Math.round((present / total) * 100) : 0;
+            safeSetText('att_percentage', toBanglaNum(percent) + '%');
+        }
+
+        // Student Results
+        function openStudentResults() {
+            if(!currentStudent) return;
+            let container = document.getElementById('student_results_container');
+            container.innerHTML = '<p class="text-center text-muted">রেজাল্ট লোড হচ্ছে...</p>';
+
+            database.ref('results/' + currentStudent.dbKey).once('value').then(snap => {
+                container.innerHTML = '';
+                if(!snap.exists()) {
+                    container.innerHTML = `<div class="card p-4 text-center text-muted border-0 shadow-sm"><i class="fas fa-award mb-2" style="font-size:30px;"></i>এখনো কোনো পরীক্ষার ফলাফল প্রকাশিত হয়নি।</div>`;
+                    return;
+                }
+                let results = snap.val();
+                for(let examType in results) {
+                    let item = results[examType];
+                    container.innerHTML += `
+                    <div class="card custom-card border-left-danger p-3 mb-3 shadow-sm">
+                        <h6 class="fw-bold text-danger mb-2"><i class="fas fa-file-signature"></i> ${examType}</h6>
+                        <div class="d-flex justify-content-between border-top pt-2 mt-1">
+                            <span>বিষয়: <strong>${item.subject || 'সকল বিষয়'}</strong></span>
+                            <span>ফলাফল: <strong class="text-primary fs-5">${toBanglaNum(item.gpa || item.grade || item)}</strong></span>
+                        </div>
+                    </div>`;
+                }
+            });
+
+            showPage('studentResultsPage');
+        }
+
+        // Inbox SMS System - Purely read from currentStudent to prevent logic conflicts
+        function openInbox() {
+            if(!currentStudent) return;
+            showPage('smsInboxPage');
+            updateInboxUI();
+        }
+
+        function updateInboxUI() {
+            let container = document.getElementById('student_inbox_container');
+            if(!container) return;
+            
+            let msgs = currentStudent.messages || {};
+            let smsNodes = currentStudent.sms || {};
+            let combinedMsgs = { ...msgs, ...smsNodes };
+            
+            let msgKeys = Object.keys(combinedMsgs);
+
+            if(msgKeys.length === 0) {
+                container.innerHTML = `<div class="card p-4 text-center text-muted border-0 shadow-sm"><i class="fas fa-envelope-open text-warning mb-2" style="font-size:30px;"></i>আপনার ইনবক্স সম্পূর্ণ ফাঁকা।</div>`;
+                return;
+            }
+            
+            container.innerHTML = '';
+            msgKeys.reverse().forEach(key => {
+                let msg = combinedMsgs[key];
+                let msgText = typeof msg === 'object' ? (msg.text || msg.message || msg.body || "") : msg;
+                let msgDate = (typeof msg === 'object' && msg.date) ? toBanglaDate(msg.date) : '---';
+                let sender = (typeof msg === 'object' && msg.sender) ? msg.sender : "স্কুল প্রশাসন";
+                
+                container.innerHTML += `
+                <div class="card custom-card border-left-warning p-3 mb-3 shadow-sm">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="badge bg-warning text-dark"><i class="fas fa-user-tie"></i> ${sender}</span>
+                        <small class="text-muted fw-bold">${msgDate}</small>
+                    </div>
+                    <p class="mb-3 text-dark mt-2" style="font-size:15px; line-height:1.5;">${msgText}</p>
+                    <button class="btn btn-sm btn-outline-danger w-100 fw-bold" onclick="deleteSms('${key}')"><i class="fas fa-trash"></i> মেসেজটি মুছে ফেলুন</button>
+                </div>`;
+            });
+        }
+        
+        function deleteSms(msgKey) {
+            customConfirm("মেসেজটি মুছে ফেলতে চান?", () => {
+                let targetRef = (currentStudent.sms && currentStudent.sms[msgKey]) ? 'sms' : 'messages';
+                database.ref('students/' + currentStudent.dbKey + '/' + targetRef + '/' + msgKey).remove().then(() => {
+                    customAlert("মেসেজটি মুছে ফেলা হয়েছে।");
+                    // Sync will automatically trigger updateInboxUI
+                });
+            });
+        }
+
+        function openSendSmsModal() {
+            let select = document.getElementById('sms_teacher_select');
+            select.innerHTML = '<option value="">শিক্ষক নির্বাচন করুন</option>';
+            if(headmasterData && headmasterData.name) {
+                select.innerHTML += `<option value="hm">প্রধান শিক্ষক (${headmasterData.name})</option>`;
+            } else {
+                select.innerHTML += `<option value="hm">প্রধান শিক্ষক</option>`;
+            }
+            teachersData.forEach((t, idx) => {
+                select.innerHTML += `<option value="${idx}">${t.name} (${t.desig})</option>`;
+            });
+            document.getElementById('sendSmsModalOverlay').style.display = 'flex';
+        }
+
+        function sendSmsToTeacher() {
+            let teacherVal = document.getElementById('sms_teacher_select').value;
+            let text = document.getElementById('sms_message_text').value.trim();
+            
+            if(!teacherVal || !text) {
+                customAlert("অনুগ্রহ করে শিক্ষক নির্বাচন করুন এবং মেসেজ লিখুন!"); return;
+            }
+            
+            let teacherName = teacherVal === 'hm' ? (headmasterData.name || "প্রধান শিক্ষক") : teachersData[teacherVal].name;
+            
+            let payload = {
+                studentId: currentStudent.id,
+                studentRoll: currentStudent.roll || 'N/A',
+                studentName: currentStudent.name,
+                studentClass: currentStudent.class,
+                teacherName: teacherName,
+                message: text,
+                date: getTodayISODate(),
+                timestamp: firebase.database.ServerValue.TIMESTAMP
+            };
+            
+            database.ref('messages_to_teachers').push(payload).then(() => {
+                closeModal('sendSmsModalOverlay');
+                document.getElementById('sms_message_text').value = '';
+                customAlert("আপনার মেসেজ সফলভাবে শিক্ষকের কাছে পাঠানো হয়েছে!");
+            });
+        }
+
+        // School Directory & Staff Profiles
+        function renderDirectory() {
+            let container = document.getElementById('directory_list_container');
+            if(!container) return;
+            
+            container.innerHTML = `<h6 class="fw-bold text-danger mb-2">প্রধান শিক্ষক</h6>`;
+            
+            if(headmasterData && headmasterData.name) {
+                let hmImg = headmasterData.photo || headmasterData.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(headmasterData.name)}&background=d32f2f&color=fff`;
+                let hmObjStr = encodeURIComponent(JSON.stringify({
+                    id: headmasterData.id || 'T-101', name: headmasterData.name, desig: headmasterData.desig || 'প্রধান শিক্ষক', phone: headmasterData.phone, 
+                    edu: headmasterData.edu, bloodGroup: headmasterData.bloodGroup, gender: headmasterData.gender, dob: headmasterData.dob,
+                    address: headmasterData.address, father: headmasterData.father, nid: headmasterData.nid, photo: hmImg
+                }));
+                
+                container.innerHTML += `
+                <div class="card custom-card p-3 mb-4 border-left-danger shadow-sm" style="cursor:pointer;" onclick="openStaffProfile('${hmObjStr}')">
+                    <div class="d-flex align-items-center">
+                        <img src="${hmImg}" class="teacher-img-sm border-danger">
+                        <div class="ms-3">
+                            <h6 class="mb-0 fw-bold">${headmasterData.name}</h6>
+                            <small class="text-muted">${headmasterData.desig || 'প্রধান শিক্ষক'}</small>
+                        </div>
+                        <div class="ms-auto"><i class="fas fa-chevron-right text-muted"></i></div>
+                    </div>
+                </div>`;
+            }
+
+            if(teachersData.length > 0) {
+                container.innerHTML += `<h6 class="fw-bold text-primary mb-2">সহকারী শিক্ষকবৃন্দ</h6>`;
+                teachersData.forEach(t => {
+                    let tImg = t.photo || t.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(t.name)}&background=1976d2&color=fff`;
+                    let tObjStr = encodeURIComponent(JSON.stringify({...t, photo: tImg}));
+                    container.innerHTML += `
+                    <div class="card custom-card p-3 mb-2 border-left-blue shadow-sm" style="cursor:pointer;" onclick="openStaffProfile('${tObjStr}')">
+                        <div class="d-flex align-items-center">
+                            <img src="${tImg}" class="teacher-img-sm border-primary">
+                            <div class="ms-3">
+                                <h6 class="mb-0 fw-bold">${t.name}</h6>
+                                <small class="text-muted">${t.desig}</small>
+                            </div>
+                            <div class="ms-auto"><i class="fas fa-chevron-right text-muted"></i></div>
+                        </div>
+                    </div>`;
+                });
+            }
+
+            if(staffData.length > 0) {
+                container.innerHTML += `<h6 class="fw-bold text-warning mb-2 mt-4">কর্মচারী ও ড্রাইভারবৃন্দ</h6>`;
+                staffData.forEach(s => {
+                    let sImg = s.photo || s.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(s.name)}&background=e67e22&color=fff`;
+                    let sObjStr = encodeURIComponent(JSON.stringify({...s, photo: sImg}));
+                    container.innerHTML += `
+                    <div class="card custom-card p-3 mb-2 border-left-warning shadow-sm" style="cursor:pointer;" onclick="openStaffProfile('${sObjStr}')">
+                        <div class="d-flex align-items-center">
+                            <img src="${sImg}" class="teacher-img-sm border-warning">
+                            <div class="ms-3">
+                                <h6 class="mb-0 fw-bold">${s.name}</h6>
+                                <small class="text-muted">${s.desig}</small>
+                            </div>
+                            <div class="ms-auto"><i class="fas fa-chevron-right text-muted"></i></div>
+                        </div>
+                    </div>`;
+                });
+            }
+        }
+
+        function openStaffProfile(encodedObj) {
+            let staffObj = JSON.parse(decodeURIComponent(encodedObj));
+            
+            document.getElementById('dir_prof_img').src = staffObj.photo;
+            safeSetText('dir_prof_name', staffObj.name || '---');
+            safeSetText('dir_prof_desig', staffObj.desig || '---');
+            
+            let callBtn = document.getElementById('dir_prof_call_btn');
+            if(staffObj.phone && staffObj.phone !== '---') {
+                callBtn.href = "tel:" + toEnglishNum(staffObj.phone);
+                callBtn.style.display = 'block';
+            } else {
+                callBtn.style.display = 'none';
+            }
+
+            safeSetText('dir_prof_id', staffObj.id || '---');
+            safeSetText('dir_prof_father', staffObj.father || '---');
+            safeSetText('dir_prof_dob', (staffObj.dob && staffObj.dob !== '---') ? toBanglaDate(staffObj.dob) : '---');
+            safeSetText('dir_prof_gender', staffObj.gender || '---');
+            safeSetText('dir_prof_blood', staffObj.bloodGroup || '---');
+            safeSetText('dir_prof_nid', staffObj.nid || '---');
+            safeSetText('dir_prof_edu', staffObj.edu || '---');
+            safeSetText('dir_prof_address', staffObj.address || '---');
+            safeSetText('dir_prof_phone', staffObj.phone ? toBanglaNum(staffObj.phone) : '---');
+
+            showPage('staffProfileDetailView');
+        }
+
+        function downloadPDF(divId, filename) {
+            var element = document.getElementById(divId);
+            var opt = { margin: 0.2, filename: filename, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' } };
+            html2pdf().set(opt).from(element).save();
+        }
+    </script>
+</body>
+</html>
