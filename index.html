@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <!-- No Cache Headers -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
@@ -275,7 +276,7 @@
         </div>
     </div>
 
-    <!-- Student Full Profile (Completely Dynamic) -->
+    <!-- Student Full Profile -->
     <div id="studentProfileDetails" class="page-view">
         <div class="school-header">
             <p class="bismillah">বিসমিল্লাহির রাহমানির রাহীম</p>
@@ -336,7 +337,7 @@
         </div>
     </div>
 
-    <!-- ATTENDANCE PAGE WITH DATE FILTER -->
+    <!-- ATTENDANCE PAGE -->
     <div id="studentAttendance" class="page-view">
         <div class="school-header">
             <p class="bismillah">বিসমিল্লাহির রাহমানির রাহীম</p>
@@ -436,7 +437,7 @@
         </div>
     </div>
 
-    <!-- DIGITAL RECEIPT VIEW PAGE (COMPLETELY DYNAMIC) -->
+    <!-- DIGITAL RECEIPT VIEW PAGE -->
     <div id="viewReceiptPage" class="page-view" style="background:#fff;">
         <div class="container px-2 pt-3 pb-5">
             <button onclick="showPage('studentReceiptsPage')" class="btn btn-sm btn-outline-secondary mb-3 no-print"><i class="fas fa-arrow-left"></i> রসিদ লিস্টে যান</button>
@@ -510,7 +511,7 @@
         </div>
     </div>
 
-    <!-- Student Inbox (SMS) -->
+    <!-- Student Inbox (SMS) with Send option -->
     <div id="smsInboxPage" class="page-view">
         <div class="school-header">
             <p class="bismillah">বিসমিল্লাহির রাহমানির রাহীম</p>
@@ -530,22 +531,21 @@
         <div class="container px-3 mt-3">
             <button onclick="showPage('studentDashboard')" class="btn btn-sm btn-outline-secondary mb-3"><i class="fas fa-arrow-left"></i> ড্যাশবোর্ডে যান</button>
             
-            <button class="btn btn-warning w-100 mb-4 fw-bold shadow-sm text-dark" onclick="openSendSmsModal()"><i class="fas fa-paper-plane me-2"></i> প্রধান শিক্ষককে মেসেজ পাঠান</button>
+            <button class="btn btn-warning w-100 mb-4 fw-bold shadow-sm text-dark" onclick="openSendSmsModal()"><i class="fas fa-paper-plane me-2"></i> শিক্ষককে মেসেজ পাঠান</button>
             
             <h6 class="fw-bold text-secondary mb-3 border-bottom pb-2">আগত মেসেজ সমূহ:</h6>
             <div id="student_inbox_container"></div>
         </div>
     </div>
 
-    <!-- Modal to Send SMS to Headmaster -->
+    <!-- Modal to Send SMS to Teachers -->
     <div id="sendSmsModalOverlay" class="custom-modal-overlay">
         <div class="custom-modal-box">
             <div class="custom-modal-header text-warning"><i class="fas fa-envelope"></i> নতুন মেসেজ</div>
             <div class="custom-modal-body text-start">
-                <label class="fw-bold text-muted mb-1">প্রাপক:</label>
-                <select id="sms_teacher_select" class="form-select mb-3 border-warning" disabled>
-                    <option value="hm" selected>প্রধান শিক্ষক</option>
-                </select>
+                <label class="fw-bold text-muted mb-1">শিক্ষক নির্বাচন করুন:</label>
+                <select id="sms_teacher_select" class="form-select mb-3 border-warning"></select>
+                
                 <label class="fw-bold text-muted mb-1">আপনার মেসেজ লিখুন:</label>
                 <textarea id="sms_message_text" class="form-control border-warning" rows="4" placeholder="এখানে মেসেজ লিখুন..."></textarea>
             </div>
@@ -615,9 +615,9 @@
 
     <!-- ================= JAVASCRIPT & SERVICE WORKER ================= -->
     <script>
-        // PWA & Auto-update Service Worker
+        // PWA & Network-First Auto Update Service Worker
         const swCode = `
-        const CACHE_NAME = 'mb-academy-student-v1';
+        const CACHE_NAME = 'mb-academy-student-v2';
         self.addEventListener('install', event => {
             self.skipWaiting();
             event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll([ location.href ])));
@@ -628,7 +628,8 @@
         });
         self.addEventListener('fetch', event => {
             event.respondWith(
-                fetch(event.request).then(res => {
+                // Network-First Strategy: Fetch fresh code from GitHub. If offline, use cache.
+                fetch(event.request, {cache: 'no-store'}).then(res => {
                     const resClone = res.clone();
                     caches.open(CACHE_NAME).then(cache => cache.put(event.request, resClone));
                     return res;
@@ -655,6 +656,7 @@
         if(!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
         const database = firebase.database();
 
+        // Local cache variables
         let studentsData = [];
         let teachersData = [];
         let staffData = [];
@@ -815,7 +817,7 @@
         function closeCustomConfirm() { document.getElementById('customConfirmOverlay').style.display = 'none'; currentConfirmAction = null; }
         document.getElementById('customConfirmBtn').addEventListener('click', function() { if(currentConfirmAction) currentConfirmAction(); closeCustomConfirm(); });
 
-        // Dynamic Profile
+        // Dynamic Profile Rendering Loop
         function renderDynamicProfile(containerId, dataObj, ignoreKeys) {
             let container = document.getElementById(containerId);
             if(!container) return;
@@ -924,7 +926,7 @@
             safeSetText('view_sp_name', currentStudent.name);
             safeSetText('view_sp_class', currentStudent.class);
 
-            // Hide id, fbKey, pass, password, role from User Profile explicitly
+            // Hide id, fbKey, pass, password, role explicitly from User Profile
             let ignoreList = ['name', 'class', 'photo', 'image', 'loginPin', 'dbKey', 'attendance', 'receipts', 'messages', 'sms', 'results', 'pass', 'password', 'role', 'id', 'fbKey'];
             renderDynamicProfile('dynamic_student_profile_list', currentStudent, ignoreList);
 
@@ -1128,7 +1130,7 @@
             let tbody = document.getElementById('receipt_dynamic_body');
             tbody.innerHTML = '';
             
-            // Core meta keys to ignore from list
+            // MAGIC FILTER: Removes isoDate, timestamp, f7t, f9d, empty fields entirely from Receipt Loop
             let metaKeys = ['rNo', 'receiptNo', 'date', 'name', 'class', 'roll', 'id', 'total', 'words', 'year', 'month', 'f2d', 'f11d', 'timestamp', 'isoDate', 'Iso date', 'isodate'];
             
             let itemMap = {
@@ -1149,9 +1151,8 @@
             let totalAmount = 0;
 
             for(let key in data) {
-                // EXCLUDE completely: isoDate, f7t, f9d, f11d etc.
-                if(metaKeys.includes(key)) continue; 
-                if(key.match(/^f\d+[dt]$/i)) continue; // Magic filter that stops f7t, f9d, F9d, f1t etc.
+                // Ignore keys that match tracking formats (like f7t, f9d, f1t) OR are exactly in metaKeys
+                if(metaKeys.includes(key) || key.match(/^f\d+[a-zA-Z]$/i)) continue; 
                 
                 let val = data[key];
                 
@@ -1185,55 +1186,57 @@
             showPage('viewReceiptPage');
         }
 
-        // PERFECT IMAGE DOWNLOAD (No cut-off)
+        // PERFECT IMAGE DOWNLOAD (Works precisely on PC & Mobile)
         function downloadImage(divId, filename) {
             window.scrollTo(0,0);
             let element = document.getElementById(divId);
+            
+            // Save current styles
             let originalWidth = element.style.width;
             let originalMaxWidth = element.style.maxWidth;
-            let originalPadding = element.style.padding;
+            let originalMargin = element.style.margin;
             
-            // Force Standard Resolution view before rendering
+            // Force precise rendering layout block so it never cuts
             element.style.width = '700px';
             element.style.maxWidth = '700px';
-            element.style.padding = '30px';
+            element.style.margin = '0 auto';
             
             setTimeout(() => {
-                html2canvas(element, { scale: 2, useCORS: true, backgroundColor: '#ffffff', windowWidth: 750 }).then(canvas => {
+                html2canvas(element, { scale: 2, useCORS: true, backgroundColor: '#ffffff', windowWidth: 750, width: 700 }).then(canvas => {
                     let link = document.createElement('a');
                     link.download = filename + '.jpg';
                     link.href = canvas.toDataURL('image/jpeg', 1.0);
                     link.click();
                     
-                    // Revert styles
+                    // Revert styles safely
                     element.style.width = originalWidth;
                     element.style.maxWidth = originalMaxWidth;
-                    element.style.padding = originalPadding;
+                    element.style.margin = originalMargin;
                 }).catch(err => {
-                    element.style.width = originalWidth; element.style.maxWidth = originalMaxWidth; element.style.padding = originalPadding;
+                    element.style.width = originalWidth; element.style.maxWidth = originalMaxWidth; element.style.margin = originalMargin;
                     alert('ছবি ডাউনলোড করতে সমস্যা হয়েছে।');
                 });
-            }, 300); // 300ms delay gives DOM time to reflow to 700px
+            }, 100);
         }
 
-        // PERFECT PDF DOWNLOAD (No cut-off)
+        // PERFECT PDF DOWNLOAD (Works precisely on PC & Mobile)
         function downloadPDF(divId, filename) {
             window.scrollTo(0,0);
             let element = document.getElementById(divId);
+            
             let originalWidth = element.style.width;
             let originalMaxWidth = element.style.maxWidth;
-            let originalPadding = element.style.padding;
+            let originalMargin = element.style.margin;
             
-            // Force Standard Resolution view before rendering
             element.style.width = '700px';
             element.style.maxWidth = '700px';
-            element.style.padding = '30px';
+            element.style.margin = '0 auto';
             
             var opt = { 
                 margin: 5, 
                 filename: filename + '.pdf', 
                 image: { type: 'jpeg', quality: 1.0 }, 
-                html2canvas: { scale: 2, useCORS: true, windowWidth: 750 }, 
+                html2canvas: { scale: 2, useCORS: true, windowWidth: 750, width: 700 }, 
                 jsPDF: { unit: 'mm', format: 'a5', orientation: 'portrait' } 
             };
             
@@ -1241,12 +1244,12 @@
                 html2pdf().set(opt).from(element).save().then(() => {
                     element.style.width = originalWidth;
                     element.style.maxWidth = originalMaxWidth;
-                    element.style.padding = originalPadding;
+                    element.style.margin = originalMargin;
                 }).catch(err => {
-                    element.style.width = originalWidth; element.style.maxWidth = originalMaxWidth; element.style.padding = originalPadding;
+                    element.style.width = originalWidth; element.style.maxWidth = originalMaxWidth; element.style.margin = originalMargin;
                     alert('PDF ডাউনলোড করতে সমস্যা হয়েছে।');
                 });
-            }, 300); // 300ms delay gives DOM time to reflow
+            }, 100);
         }
 
         function openStudentAttendance() {
@@ -1383,14 +1386,18 @@
             } else {
                 select.innerHTML += `<option value="hm">প্রধান শিক্ষক</option>`;
             }
+            teachersData.forEach((t, idx) => {
+                select.innerHTML += `<option value="${idx}">${t.name} (${t.desig || 'শিক্ষক'})</option>`;
+            });
             document.getElementById('sendSmsModalOverlay').style.display = 'flex';
         }
 
         function sendSmsToTeacher() {
+            let teacherVal = document.getElementById('sms_teacher_select').value;
             let text = document.getElementById('sms_message_text').value.trim();
-            if(!text) { customAlert("অনুগ্রহ করে মেসেজ লিখুন!"); return; }
+            if(!teacherVal || !text) { customAlert("অনুগ্রহ করে শিক্ষক নির্বাচন করুন এবং মেসেজ লিখুন!"); return; }
             
-            let teacherName = headmasterData.name ? headmasterData.name : "প্রধান শিক্ষক";
+            let teacherName = teacherVal === 'hm' ? (headmasterData.name || "প্রধান শিক্ষক") : teachersData[teacherVal].name;
             let payload = {
                 studentId: currentStudent.id, studentRoll: currentStudent.roll || 'N/A', studentName: currentStudent.name,
                 studentClass: currentStudent.class, teacherName: teacherName, message: text,
@@ -1465,7 +1472,7 @@
             if(staffObj.phone && staffObj.phone !== '---') { callBtn.href = "tel:" + toEnglishNum(staffObj.phone); callBtn.style.display = 'block'; } 
             else { callBtn.style.display = 'none'; }
 
-            // Hide id, fbKey, pass, and role explicitly from rendering
+            // Hide id, fbKey, pass, role etc. explicitly from rendering
             let ignoreList = ['name', 'desig', 'photo', 'image', 'dbKey', 'pass', 'password', 'role', 'id', 'fbKey'];
             renderDynamicProfile('dynamic_staff_profile_list', staffObj, ignoreList);
 
