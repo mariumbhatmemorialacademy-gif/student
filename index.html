@@ -53,7 +53,7 @@
         
         .gallery-slider-container { position: relative; width: 100%; height: 220px; overflow: hidden; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); background: #000; margin: 0 auto 20px auto; }
         .gallery-slider-track { display: flex; height: 100%; transition: transform 0.5s ease-in-out; }
-        .gallery-slide { min-width: 100%; height: 100%; object-fit: cover; }
+        .gallery-slide { flex: 0 0 100%; min-width: 100%; width: 100%; height: 100%; object-fit: cover; }
         .slider-btn { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.6); color: white; border: none; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; z-index: 10; display: flex; align-items: center; justify-content: center; transition: 0.3s; }
         .slider-btn:hover { background: rgba(0,0,0,0.8); }
         .slider-btn.prev { left: 10px; }
@@ -276,7 +276,7 @@
         </div>
     </div>
 
-    <!-- Student Full Profile -->
+    <!-- Student Full Profile (Completely Dynamic) -->
     <div id="studentProfileDetails" class="page-view">
         <div class="school-header">
             <p class="bismillah">বিসমিল্লাহির রাহমানির রাহীম</p>
@@ -337,7 +337,7 @@
         </div>
     </div>
 
-    <!-- ATTENDANCE PAGE -->
+    <!-- ATTENDANCE PAGE WITH DATE FILTER -->
     <div id="studentAttendance" class="page-view">
         <div class="school-header">
             <p class="bismillah">বিসমিল্লাহির রাহমানির রাহীম</p>
@@ -393,7 +393,7 @@
         </div>
     </div>
 
-    <!-- RECEIPTS HISTORY PAGE -->
+    <!-- RECEIPTS HISTORY PAGE WITH DYNAMIC YEAR FILTER -->
     <div id="studentReceiptsPage" class="page-view">
         <div class="school-header">
             <p class="bismillah">বিসমিল্লাহির রাহমানির রাহীম</p>
@@ -413,6 +413,7 @@
         <div class="container px-3 mt-3">
             <button onclick="showPage('studentDashboard')" class="btn btn-sm btn-outline-secondary mb-3"><i class="fas fa-arrow-left"></i> ড্যাশবোর্ডে যান</button>
             
+            <!-- Receipt Filter -->
             <div class="card custom-card p-3 mb-3 bg-light shadow-sm">
                 <h6 class="fw-bold mb-2 text-secondary" style="font-size: 14px;"><i class="fas fa-filter"></i> মাস ও বছর অনুযায়ী রসিদ খুঁজুন:</h6>
                 <div class="row g-2">
@@ -437,7 +438,7 @@
         </div>
     </div>
 
-    <!-- DIGITAL RECEIPT VIEW PAGE -->
+    <!-- DIGITAL RECEIPT VIEW PAGE (COMPLETELY DYNAMIC) -->
     <div id="viewReceiptPage" class="page-view" style="background:#fff;">
         <div class="container px-2 pt-3 pb-5">
             <button onclick="showPage('studentReceiptsPage')" class="btn btn-sm btn-outline-secondary mb-3 no-print"><i class="fas fa-arrow-left"></i> রসিদ লিস্টে যান</button>
@@ -531,20 +532,23 @@
         <div class="container px-3 mt-3">
             <button onclick="showPage('studentDashboard')" class="btn btn-sm btn-outline-secondary mb-3"><i class="fas fa-arrow-left"></i> ড্যাশবোর্ডে যান</button>
             
-            <button class="btn btn-warning w-100 mb-4 fw-bold shadow-sm text-dark" onclick="openSendSmsModal()"><i class="fas fa-paper-plane me-2"></i> শিক্ষককে মেসেজ পাঠান</button>
+            <button class="btn btn-warning w-100 mb-4 fw-bold shadow-sm text-dark" onclick="openSendSmsModal()"><i class="fas fa-paper-plane me-2"></i> প্রধান শিক্ষককে মেসেজ পাঠান</button>
             
             <h6 class="fw-bold text-secondary mb-3 border-bottom pb-2">আগত মেসেজ সমূহ:</h6>
             <div id="student_inbox_container"></div>
         </div>
     </div>
 
-    <!-- Modal to Send SMS to Teachers -->
+    <!-- Modal to Send SMS to Headmaster -->
     <div id="sendSmsModalOverlay" class="custom-modal-overlay">
         <div class="custom-modal-box">
             <div class="custom-modal-header text-warning"><i class="fas fa-envelope"></i> নতুন মেসেজ</div>
             <div class="custom-modal-body text-start">
-                <label class="fw-bold text-muted mb-1">শিক্ষক নির্বাচন করুন:</label>
-                <select id="sms_teacher_select" class="form-select mb-3 border-warning"></select>
+                <label class="fw-bold text-muted mb-1">প্রাপক:</label>
+                <!-- Fixed to Headmaster Only -->
+                <select id="sms_teacher_select" class="form-select mb-3 border-warning" disabled>
+                    <option value="hm" selected>প্রধান শিক্ষক</option>
+                </select>
                 
                 <label class="fw-bold text-muted mb-1">আপনার মেসেজ লিখুন:</label>
                 <textarea id="sms_message_text" class="form-control border-warning" rows="4" placeholder="এখানে মেসেজ লিখুন..."></textarea>
@@ -579,7 +583,7 @@
         </div>
     </div>
 
-    <!-- Staff Full Profile (Completely Dynamic) -->
+    <!-- Staff Full Profile Detail Page -->
     <div id="staffProfileDetailView" class="page-view">
         <div class="school-header">
             <p class="bismillah">বিসমিল্লাহির রাহমানির রাহীম</p>
@@ -656,7 +660,6 @@
         if(!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
         const database = firebase.database();
 
-        // Local cache variables
         let studentsData = [];
         let teachersData = [];
         let staffData = [];
@@ -758,7 +761,24 @@
                 if(currentStudent && document.getElementById('studentLesson').classList.contains('active')) renderStudentLessons(); 
             });
             
-            database.ref('gallery').on('value', snap => { if(snap.exists()){ galleryImages = []; snap.forEach(c => galleryImages.push(c.val())); renderGallerySlider(); } });
+            // রিকার্সিভ ডিপ-স্ক্যান: গ্যালারির যেকোনো ফোল্ডারের ভেতর থেকে সব ছবি বের করার লজিক
+            database.ref('gallery').on('value', snap => { 
+                galleryImages = [];
+                if(snap.exists()){ 
+                    let data = snap.val();
+                    function extractImages(obj) {
+                        if (typeof obj === 'string') {
+                            if(obj.trim() !== "") galleryImages.push(obj.trim());
+                        } else if (typeof obj === 'object' && obj !== null) {
+                            for (let key in obj) {
+                                extractImages(obj[key]);
+                            }
+                        }
+                    }
+                    extractImages(data);
+                }
+                renderGallerySlider(); 
+            });
             
             database.ref('notice').on('value', snap => {
                 if(snap.exists()){
@@ -796,7 +816,7 @@
 
         // Utilities
         function toBanglaNum(num) { const b = { '0': '০', '1': '১', '2': '২', '3': '৩', '4': '৪', '5': '৫', '6': '৬', '7': '৭', '8': '৮', '9': '৯' }; return String(num).replace(/[0-9]/g, x => b[x] || x); }
-        function toEnglishNum(numStr) { const e = {'০': '0', '১': '1', '২': '2', '৩': '3', '৪': '4', '৫': '5', '৬': '6', '৭': '7', '৮': '8', '৯': '9'}; return String(numStr).replace(/[০-৯]/g, x => e[x] || x); }
+        function toEnglishNum(numStr) { const e = {'০': '0', '১': '1', '২': '2', '৩': '3', '৪': '4', '৫': '5', '৬': '6', '৭': '7', '8': '৮', '9': '৯'}; return String(numStr).replace(/[০-৯]/g, x => e[x] || x); }
         function getTodayISODate() { const d = new Date(); let m = '' + (d.getMonth() + 1), day = '' + d.getDate(), y = d.getFullYear(); if (m.length < 2) m = '0' + m; if (day.length < 2) day = '0' + day; return [y, m, day].join('-'); }
         function toBanglaDate(isoDate) { if(!isoDate) return ""; const months = ["জানুয়ারি", "ফেব্রুয়ারি", "মার্চ", "এপ্রিল", "মে", "জুন", "জুলাই", "আগস্ট", "সেপ্টেম্বর", "অক্টোবর", "নভেম্বর", "ডিসেম্বর"]; const p = isoDate.split('-'); if(p.length !== 3) return isoDate; return toBanglaNum(parseInt(p[2])) + " " + months[parseInt(p[1]) - 1] + " " + toBanglaNum(p[0]); }
         function safeSetText(id, val) { let el = document.getElementById(id); if(el) el.innerText = val; }
@@ -806,6 +826,7 @@
             let activePage = document.getElementById(pageId);
             activePage.classList.add('active'); 
             window.scrollTo(0, 0); 
+            
             let marquees = activePage.querySelectorAll('marquee');
             marquees.forEach(m => { m.stop(); setTimeout(() => m.start(), 50); });
         }
@@ -861,19 +882,44 @@
             }
         }
 
+        // গ্যালারি স্লাইডার ফাংশন
         function renderGallerySlider() {
-            let track = document.getElementById('home_gallery_track'); let dotsContainer = document.getElementById('home_gallery_dots'); if(!track) return; track.innerHTML = ''; dotsContainer.innerHTML = '';
-            if(galleryImages.length === 0) { track.innerHTML = '<div class="gallery-slide d-flex align-items-center justify-content-center text-white w-100 bg-dark">গ্যালারিতে কোনো ছবি নেই</div>'; return; }
-            galleryImages.forEach((imgObj, idx) => { 
-                let imgUrl = typeof imgObj === 'string' ? imgObj : imgObj.url;
+            let track = document.getElementById('home_gallery_track'); 
+            let dotsContainer = document.getElementById('home_gallery_dots'); 
+            if(!track) return; 
+            track.innerHTML = ''; dotsContainer.innerHTML = '';
+            
+            // ডুপ্লিকেট ছবিগুলো রিমুভ করা
+            let uniqueImages = [...new Set(galleryImages)];
+            
+            if(uniqueImages.length === 0) { 
+                track.innerHTML = '<div class="gallery-slide d-flex align-items-center justify-content-center text-white w-100 bg-dark">গ্যালারিতে কোনো ছবি নেই</div>'; 
+                return; 
+            }
+            
+            currentSlide = 0; 
+            uniqueImages.forEach((imgUrl, idx) => { 
                 track.innerHTML += `<img src="${imgUrl}" class="gallery-slide">`; 
                 dotsContainer.innerHTML += `<span class="slider-dot ${idx === 0 ? 'active' : ''}" onclick="goToSlide(${idx})"></span>`; 
             });
+            
             updateSliderPosition(); stopAutoSlide(); startAutoSlide();
         }
-        function moveGallery(dir) { if(galleryImages.length === 0) return; currentSlide += dir; if(currentSlide < 0) currentSlide = galleryImages.length - 1; if(currentSlide >= galleryImages.length) currentSlide = 0; updateSliderPosition(); }
+        function moveGallery(dir) { 
+            let dots = document.querySelectorAll('.slider-dot');
+            if(dots.length <= 1) return; // ছবি ১টি হলে স্লাইড হবে না
+            currentSlide += dir; 
+            if(currentSlide < 0) currentSlide = dots.length - 1; 
+            if(currentSlide >= dots.length) currentSlide = 0; 
+            updateSliderPosition(); 
+        }
         function goToSlide(idx) { currentSlide = idx; updateSliderPosition(); stopAutoSlide(); startAutoSlide(); }
-        function updateSliderPosition() { let track = document.getElementById('home_gallery_track'); if(!track) return; track.style.transform = `translateX(-${currentSlide * 100}%)`; let dots = document.querySelectorAll('.slider-dot'); dots.forEach((dot, idx) => { if(idx === currentSlide) dot.classList.add('active'); else dot.classList.remove('active'); }); }
+        function updateSliderPosition() { 
+            let track = document.getElementById('home_gallery_track'); if(!track) return; 
+            track.style.transform = `translateX(-${currentSlide * 100}%)`; 
+            let dots = document.querySelectorAll('.slider-dot'); 
+            dots.forEach((dot, idx) => { if(idx === currentSlide) dot.classList.add('active'); else dot.classList.remove('active'); }); 
+        }
         function startAutoSlide() { slideInterval = setInterval(() => { moveGallery(1); }, 3000); }
         function stopAutoSlide() { clearInterval(slideInterval); }
 
@@ -923,6 +969,7 @@
             let dImg = document.getElementById('dash_s_img'); if(dImg) dImg.src = imgUrl;
             let vImg = document.getElementById('view_sp_img'); if(vImg) vImg.src = imgUrl;
 
+            // Setup static header values
             safeSetText('view_sp_name', currentStudent.name);
             safeSetText('view_sp_class', currentStudent.class);
 
@@ -1191,12 +1238,10 @@
             window.scrollTo(0,0);
             let element = document.getElementById(divId);
             
-            // Save current styles
             let originalWidth = element.style.width;
             let originalMaxWidth = element.style.maxWidth;
             let originalMargin = element.style.margin;
             
-            // Force precise rendering layout block so it never cuts
             element.style.width = '700px';
             element.style.maxWidth = '700px';
             element.style.margin = '0 auto';
@@ -1207,8 +1252,6 @@
                     link.download = filename + '.jpg';
                     link.href = canvas.toDataURL('image/jpeg', 1.0);
                     link.click();
-                    
-                    // Revert styles safely
                     element.style.width = originalWidth;
                     element.style.maxWidth = originalMaxWidth;
                     element.style.margin = originalMargin;
@@ -1378,26 +1421,27 @@
             });
         }
 
+        // SMS Teacher Selector dynamically updated to FIXED Headmaster Only
         function openSendSmsModal() {
             let select = document.getElementById('sms_teacher_select');
-            select.innerHTML = '<option value="">শিক্ষক নির্বাচন করুন</option>';
+            select.innerHTML = '';
+            
+            // Fixed Headmaster Option
             if(headmasterData && headmasterData.name) {
-                select.innerHTML += `<option value="hm">প্রধান শিক্ষক (${headmasterData.name})</option>`;
+                select.innerHTML += `<option value="hm" selected>প্রধান শিক্ষক (${headmasterData.name})</option>`;
             } else {
-                select.innerHTML += `<option value="hm">প্রধান শিক্ষক</option>`;
+                select.innerHTML += `<option value="hm" selected>প্রধান শিক্ষক</option>`;
             }
-            teachersData.forEach((t, idx) => {
-                select.innerHTML += `<option value="${idx}">${t.name} (${t.desig || 'শিক্ষক'})</option>`;
-            });
+            
             document.getElementById('sendSmsModalOverlay').style.display = 'flex';
         }
 
         function sendSmsToTeacher() {
             let teacherVal = document.getElementById('sms_teacher_select').value;
             let text = document.getElementById('sms_message_text').value.trim();
-            if(!teacherVal || !text) { customAlert("অনুগ্রহ করে শিক্ষক নির্বাচন করুন এবং মেসেজ লিখুন!"); return; }
+            if(!text) { customAlert("অনুগ্রহ করে মেসেজ লিখুন!"); return; } // Removed 'শিক্ষক নির্বাচন করুন' text from alert
             
-            let teacherName = teacherVal === 'hm' ? (headmasterData.name || "প্রধান শিক্ষক") : teachersData[teacherVal].name;
+            let teacherName = teacherVal === 'hm' ? (headmasterData.name || "প্রধান শিক্ষক") : "প্রধান শিক্ষক";
             let payload = {
                 studentId: currentStudent.id, studentRoll: currentStudent.roll || 'N/A', studentName: currentStudent.name,
                 studentClass: currentStudent.class, teacherName: teacherName, message: text,
@@ -1406,7 +1450,7 @@
             
             database.ref('messages_to_teachers').push(payload).then(() => {
                 closeModal('sendSmsModalOverlay'); document.getElementById('sms_message_text').value = '';
-                customAlert("আপনার মেসেজ সফলভাবে শিক্ষকের কাছে পাঠানো হয়েছে!");
+                customAlert("আপনার মেসেজ সফলভাবে প্রধান শিক্ষকের কাছে পাঠানো হয়েছে!");
             });
         }
 
@@ -1472,7 +1516,7 @@
             if(staffObj.phone && staffObj.phone !== '---') { callBtn.href = "tel:" + toEnglishNum(staffObj.phone); callBtn.style.display = 'block'; } 
             else { callBtn.style.display = 'none'; }
 
-            // Hide id, fbKey, pass, role etc. explicitly from rendering
+            // Hide id, fbKey, pass, and role explicitly from rendering
             let ignoreList = ['name', 'desig', 'photo', 'image', 'dbKey', 'pass', 'password', 'role', 'id', 'fbKey'];
             renderDynamicProfile('dynamic_staff_profile_list', staffObj, ignoreList);
 
