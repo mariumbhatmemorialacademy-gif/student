@@ -752,9 +752,28 @@
                 }
             });
 
-            database.ref('headmaster').on('value', snap => { if(snap.exists()) { headmasterData = snap.val(); renderDirectory(); } });
-            database.ref('teachers').on('value', snap => { if(snap.exists()){ teachersData = []; snap.forEach(c => teachersData.push(c.val())); renderDirectory(); } });
-            database.ref('staff').on('value', snap => { if(snap.exists()){ staffData = []; snap.forEach(c => staffData.push(c.val())); renderDirectory(); } });
+            database.ref('headmaster').on('value', snap => {
+    let list = snap.exists() ? extractPeopleFromNode(snap.val()) : [];
+    headmasterData = list.length > 0 ? list[0] : {};
+    renderDirectory();
+});
+
+database.ref('teachers').on('value', snap => {
+    teachersData = snap.exists() ? extractPeopleFromNode(snap.val()) : [];
+    renderDirectory();
+});
+
+database.ref('staff').on('value', snap => {
+    window.rawStaffNode1 = snap.exists() ? extractPeopleFromNode(snap.val()) : [];
+    staffData = [...(window.rawStaffNode1 || []), ...(window.rawStaffNode2 || [])];
+    renderDirectory();
+});
+
+database.ref('staffs').on('value', snap => {
+    window.rawStaffNode2 = snap.exists() ? extractPeopleFromNode(snap.val()) : [];
+    staffData = [...(window.rawStaffNode1 || []), ...(window.rawStaffNode2 || [])];
+    renderDirectory();
+});
             
             database.ref('lessons').on('value', snap => { 
                 window.rawLessonsNode = snap.val() || {};
