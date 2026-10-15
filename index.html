@@ -914,15 +914,69 @@
             }
         }
 
+        // ক্লাসের নামের যেকোনো বানান (শ্রেণি/শ্রেণী, য়/য়, নার্সারি/নার্সারী) এক সমান করার ফাংশন
+        function normalizeClassName(cls) {
+            if (!cls) return "";
+            let s = String(cls).normalize('NFC').trim();
+            s = toBanglaNum(s);
+            s = s.replace(/\u09AF\u09BC/g, '\u09DF'); // 'য়' কে 'য়' তে রূপান্তর
+            s = s.replace(/শ্রেণী|শ্রেণি|class/gi, '');
+            s = s.replace(/নার্সারী/g, 'নার্সারি');
+            s = s.replace(/প্রথম/g, '১ম')
+                 .replace(/দ্বিতীয়|দ্বিতীয়/g, '২য়')
+                 .replace(/তৃতীয়|তৃতীয়/g, '৩য়')
+                 .replace(/চতুর্থ/g, '৪র্থ')
+                 .replace(/পঞ্চম/g, '৫ম');
+            if (s.includes('প্লে')) return 'প্লে';
+            if (s.includes('নার্সারি')) return 'নার্সারি';
+            if (s.includes('ফুলের')) return 'ফুলেরমেলা';
+            return s.replace(/[\s\-_]+/g, '');
+        }
+
+        // ডাটাবেজ থেকে শিক্ষার্থীর পিন ও ক্লাস সঠিকভাবে বের করার ফাংশন
+        function getStudentCleanPin(std) {
+            let rawPin = std.loginPin !== undefined ? std.loginPin : (std.pin !== undefined ? std.pin : (std.password !== undefined ? std.password : (std.pass !== undefined ? std.pass : "")));
+            return toEnglishNum(String(rawPin).trim());
+        }
+
+        function getStudentCleanClass(std) {
+            let rawClass = std.class || std.className || std.studentClass || std.cls || "";
+            return normalizeClassName(rawClass);
+        }
+
+        // ডাটাবেজে শিক্ষার্থী সরাসরি বা ক্লাস ফোল্ডারের ভেতরে থাকলে সবগুলো বের করার ফাংশন
+        function getAllStudentsList() {
+            let list = [];
+            studentsData.forEach(item => {
+                if (!item || typeof item !== 'object') return;
+                if (item.name || item.roll || item.loginPin !== undefined || item.pin !== undefined) {
+                    list.push(item);
+                } else {
+                    for (let k in item) {
+                        if (k === 'dbKey') continue;
+                        let sub = item[k];
+                        if (sub && typeof sub === 'object' && (sub.name || sub.roll || sub.loginPin !== undefined || sub.pin !== undefined)) {
+                            if (!sub.class) sub.class = item.dbKey;
+                            sub.dbKey = item.dbKey + '/' + k;
+                            list.push(sub);
+                        }
+                    }
+                }
+            });
+            return list;
+        }
+
         function checkAutoLogin() {
             let savedClass = localStorage.getItem('studentAppClass');
             let savedPinRaw = localStorage.getItem('studentAppPin');
-            if(savedClass && savedPinRaw && studentsData.length > 0) {
-                let pin = toEnglishNum(savedPinRaw);
-                let std = studentsData.find(s => {
-                    let dbClass = (s.class || "").trim();
-                    let dbPin = String(s.loginPin || "").trim();
-                    return (dbClass === savedClass.trim()) && ((dbPin === pin) || (dbPin === "" && pin === "123456"));
+            let allStudents = getAllStudentsList();
+            if(savedClass && savedPinRaw && allStudents.length > 0) {
+                let pin = toEnglishNum(savedPinRaw).trim();
+                let targetClass = normalizeClassName(savedClass);
+                let std = allStudents.find(s => {
+                    let dbClass = getStudentCleanClass(s);
+                    let dbPin = getStudentCleanPin(s);
+                    return (dbClass === targetClass) && ((dbPin === pin) || (dbPin === "" && pin === "123456"));
                 });
                 if(std) {
                     currentStudent = std;
@@ -976,16 +1030,20 @@
             let selectedClass = document.getElementById('login_student_class').value;
             let pinRaw = document.getElementById('login_student_pin').value.trim();
             if(!selectedClass || !pinRaw) { customAlert("অনুগ্রহ করে আপনার ক্লাস এবং পিন নম্বর সঠিকভাবে প্রদান করুন!"); return; }
-            let pin = toEnglishNum(pinRaw);
-            if(studentsData.length === 0) { customAlert("ডাটাবেজে কোনো তথ্য পাওয়া যায়নি, অথবা ইন্টারনেট সংযোগ চেক করুন।"); return; }
+            
+            let pin = toEnglishNum(pinRaw).trim();
+            let targetClass = normalizeClassName(selectedClass);
+            let allStudents = getAllStudentsList();
+            
+            if(allStudents.length === 0) { customAlert("ডাটাবেজে কোনো তথ্য পাওয়া যায়নি, অথবা ইন্টারনেট সংযোগ চেক করুন।"); return; }
 
             let studentFound = false;
-            for(let i = 0; i < studentsData.length; i++) {
-                let std = studentsData[i];
-                let dbClass = (std.class || "").trim();
-                let dbPin = String(std.loginPin || "").trim();
+            for(let i = 0; i < allStudents.length; i++) {
+                let std = allStudents[i];
+                let dbClass = getStudentCleanClass(std);
+                let dbPin = getStudentCleanPin(std);
 
-                if (dbClass === selectedClass.trim() && (dbPin === pin || (dbPin === "" && pin === "123456"))) {
+                if (dbClass === targetClass && (dbPin === pin || (dbPin === "" && pin === "123456"))) {
                     studentFound = true;
                     performLogin(std, selectedClass, pinRaw);
                     break;
@@ -1047,45 +1105,77 @@
             renderStudentLessons(); showPage('studentLesson');
         }
 
+        // পড়ার ক্লাস এবং শিক্ষার্থীর ক্লাস মেলানোর ফাংশন (বানান বা ঈ-কার/ই-কার ভেদাভেদ ছাড়া)
+        function isLessonClassMatch(rawClassStr, studentNormClass) {
+            if (!rawClassStr) return false;
+            let raw = String(rawClassStr).trim();
+            if (raw === 'All' || raw === 'সকল ক্লাস' || raw === 'সকল' || raw === 'সব ক্লাস') return true;
+            return normalizeClassName(raw) === studentNormClass;
+        }
+
         function renderStudentLessons() {
             if(!currentStudent) return;
             let date = document.getElementById('student_lesson_date').value;
             let container = document.getElementById('student_lesson_container');
             container.innerHTML = '';
             let hasData = false;
+            let myNormClass = getStudentCleanClass(currentStudent);
 
             if (window.rawLessonsNode) {
                 for(let key in window.rawLessonsNode) {
                     let item = window.rawLessonsNode[key];
                     if(typeof item === 'object' && item !== null) {
-                        let lClass = (item.class || "").trim();
-                        let matchClass = (lClass === currentStudent.class.trim() || lClass === 'All' || lClass === 'সকল ক্লাস' || lClass === 'সকল' || lClass === '');
+                        let lClass = (item.class || item.className || "").trim();
+                        let matchClass = (lClass === '' || isLessonClassMatch(lClass, myNormClass));
                         
+                        // ১. সরাসরি অবজেক্টের ভেতর class এবং date থাকলে
                         if (matchClass && item.date && isDateMatch(item.date, date)) {
                             hasData = true; appendLessonCard(item, container); continue;
                         }
                         
-                        if (key.trim() === currentStudent.class.trim() || key === 'All' || key === 'সকল ক্লাস') {
-                             for(let subKey in item) {
-                                 let subItem = item[subKey];
-                                 if(typeof subItem === 'object' && subItem !== null) {
-                                     if (isDateMatch(subKey, date)) {
-                                         hasData = true;
-                                         if(subItem.subject || subItem.details || subItem.image || subItem.bangla) {
-                                             appendLessonCard(subItem, container);
-                                         } else {
-                                             for(let ssKey in subItem) {
-                                                 let ssItem = subItem[ssKey];
-                                                 if(typeof ssItem === 'object') { appendLessonCard(ssItem, container); } 
-                                                 else if (typeof ssItem === 'string') { appendLessonCard({subject: ssKey, details: ssItem}, container); }
-                                             }
-                                         }
-                                     } 
-                                     else if (subItem.date && isDateMatch(subItem.date, date)) {
-                                         hasData = true; appendLessonCard(subItem, container);
-                                     }
-                                 }
-                             }
+                        // ২. ফোল্ডারের নাম ক্লাসের নামে হলে (যেমন: lessons -> ২য় শ্রেণি -> তারিখ/আইডি)
+                        if (isLessonClassMatch(key, myNormClass)) {
+                            for(let subKey in item) {
+                                let subItem = item[subKey];
+                                if(typeof subItem === 'object' && subItem !== null) {
+                                    if (isDateMatch(subKey, date)) {
+                                        hasData = true;
+                                        if(subItem.subject || subItem.details || subItem.text || subItem.image || subItem.bangla) {
+                                            appendLessonCard(subItem, container);
+                                        } else {
+                                            for(let ssKey in subItem) {
+                                                let ssItem = subItem[ssKey];
+                                                if(typeof ssItem === 'object' && ssItem !== null) { appendLessonCard(ssItem, container); } 
+                                                else if (typeof ssItem === 'string') { appendLessonCard({subject: ssKey, details: ssItem}, container); }
+                                            }
+                                        }
+                                    } 
+                                    else if (subItem.date && isDateMatch(subItem.date, date)) {
+                                        hasData = true; appendLessonCard(subItem, container);
+                                    }
+                                }
+                            }
+                        }
+                        // ৩. ফোল্ডারের নাম তারিখের নামে হলে (যেমন: lessons -> 2026-10-15 -> ২য় শ্রেণি)
+                        else if (isDateMatch(key, date)) {
+                            for(let subKey in item) {
+                                let subItem = item[subKey];
+                                if(typeof subItem === 'object' && subItem !== null) {
+                                    let subClass = subItem.class || subItem.className || subKey;
+                                    if (isLessonClassMatch(subClass, myNormClass)) {
+                                        hasData = true;
+                                        if(subItem.subject || subItem.details || subItem.text || subItem.image || subItem.bangla) {
+                                            appendLessonCard(subItem, container);
+                                        } else {
+                                            for(let ssKey in subItem) {
+                                                let ssItem = subItem[ssKey];
+                                                if(typeof ssItem === 'object' && ssItem !== null) { appendLessonCard(ssItem, container); }
+                                                else if (typeof ssItem === 'string') { appendLessonCard({subject: ssKey, details: ssItem}, container); }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                 }
